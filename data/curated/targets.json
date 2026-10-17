@@ -1,0 +1,430 @@
+{
+  "_note": "Terrain (relief, slope, elevation) for each target is measured by tools/build-targets.mjs from LRO LOLA (Moon) and MGS MOLA (Mars). Climate values are rounded literature figures: Moon — LRO Diviner (Williams et al. 2017, Icarus 283; Paige et al. 2010, Science 330); Mars — Curiosity REMS, Perseverance MEDA, Phoenix MET, InSight APSS and the Mars Climate Database v6. ts_* are ground (surface) temperatures in °C: annual mean, mean daily maximum, mean daily minimum. pressure in kPa, humidity in g/kg, precip in mm/day, uv as an index (both bodies exceed any Earth value), wind in m/s. ice/volcanic/impact are 0–1 degrees of how strongly the site is defined by ground ice, basaltic volcanism and impact cratering. cave (only for cave and lava-channel sites) is how strongly the site is defined by lava tubes; other sites leave it out.",
+  "moon": [
+    {
+      "id": "shackleton",
+      "name": "Shackleton rim & connecting ridge",
+      "lat": -89.45,
+      "lon": 137,
+      "mission": "Artemis south-pole candidate area",
+      "kind": "Polar base",
+      "why": "Near-continuous sunlight on the rim, permanently shadowed cold traps with water ice a few km away.",
+      "climate": {
+        "ts_mean": -120,
+        "ts_max": -40,
+        "ts_min": -185,
+        "precip": 0,
+        "humidity": 0,
+        "pressure": 0,
+        "uv": 20,
+        "wind": null
+      },
+      "ice": 1,
+      "volcanic": 0,
+      "impact": 1,
+      "uk": {
+        "name": "Вал кратера Шеклтон і сполучний хребет",
+        "mission": "Район-кандидат Artemis біля південного полюса",
+        "kind": "Полярна база",
+        "why": "Майже безперервне сонячне світло на валу, а за кілька кілометрів — вічно затінені холодні пастки з водяним льодом."
+      }
+    },
+    {
+      "id": "malapert",
+      "name": "Malapert Massif",
+      "lat": -85.99,
+      "lon": -2.93,
+      "mission": "Artemis III candidate region",
+      "kind": "Polar base",
+      "why": "A 5 km massif with long sunlit periods and direct line-of-sight to Earth for communications.",
+      "climate": {
+        "ts_mean": -110,
+        "ts_max": -20,
+        "ts_min": -180,
+        "precip": 0,
+        "humidity": 0,
+        "pressure": 0,
+        "uv": 20,
+        "wind": null
+      },
+      "ice": 0.8,
+      "volcanic": 0,
+      "impact": 1,
+      "uk": {
+        "name": "Масив Малаперт",
+        "mission": "Район-кандидат Artemis III",
+        "kind": "Полярна база",
+        "why": "Масив заввишки 5 км із довгими сонячними періодами та прямою видимістю Землі для зв’язку."
+      }
+    },
+    {
+      "id": "mons-mouton",
+      "name": "Mons Mouton plateau",
+      "lat": -84.6,
+      "lon": 31,
+      "mission": "Artemis III candidate region; VIPER study area",
+      "kind": "Polar base",
+      "why": "A broad, relatively flat mountain top with good lighting next to ice-bearing cold traps.",
+      "climate": {
+        "ts_mean": -105,
+        "ts_max": -15,
+        "ts_min": -180,
+        "precip": 0,
+        "humidity": 0,
+        "pressure": 0,
+        "uv": 20,
+        "wind": null
+      },
+      "ice": 0.8,
+      "volcanic": 0,
+      "impact": 1,
+      "uk": {
+        "name": "Плато гори Мутон",
+        "mission": "Район-кандидат Artemis III; район досліджень VIPER",
+        "kind": "Полярна база",
+        "why": "Широка, відносно рівна вершина з добрим освітленням поруч із холодними пастками, де є лід."
+      }
+    },
+    {
+      "id": "apollo11",
+      "name": "Tranquillity Base",
+      "lat": 0.67,
+      "lon": 23.47,
+      "mission": "Apollo 11 landing site",
+      "kind": "Mare plain",
+      "why": "Smooth basaltic mare: the reference case for an equatorial landing on old lava plains.",
+      "climate": {
+        "ts_mean": -60,
+        "ts_max": 120,
+        "ts_min": -178,
+        "precip": 0,
+        "humidity": 0,
+        "pressure": 0,
+        "uv": 20,
+        "wind": null
+      },
+      "ice": 0,
+      "volcanic": 1,
+      "impact": 0.8,
+      "uk": {
+        "name": "База Спокою",
+        "mission": "Місце посадки Apollo 11",
+        "kind": "Морська рівнина",
+        "why": "Рівне базальтове море — еталон екваторіальної посадки на давніх лавових рівнинах."
+      }
+    },
+    {
+      "id": "hadley",
+      "name": "Hadley Rille",
+      "lat": 26.13,
+      "lon": 3.63,
+      "mission": "Apollo 15 landing site",
+      "kind": "Lava channel",
+      "why": "A sinuous lava channel at the foot of the Apennine mountains — volcanic and impact geology side by side.",
+      "climate": {
+        "ts_mean": -65,
+        "ts_max": 110,
+        "ts_min": -180,
+        "precip": 0,
+        "humidity": 0,
+        "pressure": 0,
+        "uv": 20,
+        "wind": null
+      },
+      "ice": 0,
+      "volcanic": 1,
+      "impact": 0.8,
+      "uk": {
+        "name": "Борозна Гедлі",
+        "mission": "Місце посадки Apollo 15",
+        "kind": "Лавовий канал",
+        "why": "Звивистий лавовий канал біля підніжжя місячних Апеннін — вулканічна й ударна геологія поруч."
+      },
+      "cave": 0.5
+    },
+    {
+      "id": "marius-pit",
+      "name": "Marius Hills skylight",
+      "lat": 14.1,
+      "lon": -56.8,
+      "mission": "LRO-imaged pit into a probable lava tube",
+      "kind": "Cave / lava tube",
+      "why": "A natural opening into a lava tube that could shield a base from radiation, micrometeorites and temperature swings.",
+      "climate": {
+        "ts_mean": -60,
+        "ts_max": 118,
+        "ts_min": -178,
+        "precip": 0,
+        "humidity": 0,
+        "pressure": 0,
+        "uv": 20,
+        "wind": null
+      },
+      "ice": 0,
+      "volcanic": 1,
+      "impact": 0.6,
+      "uk": {
+        "name": "Провал у пагорбах Марія",
+        "mission": "Знятий LRO провал у ймовірну лавову трубку",
+        "kind": "Печера / лавова трубка",
+        "why": "Природний вхід у лавову трубку, яка могла б захистити базу від радіації, мікрометеоритів і перепадів температур."
+      },
+      "cave": 1
+    }
+  ],
+  "mars": [
+    {
+      "id": "jezero",
+      "name": "Jezero crater",
+      "lat": 18.44,
+      "lon": 77.45,
+      "mission": "Perseverance landing site",
+      "kind": "Crater lake delta",
+      "why": "An ancient crater lake with a river delta — the place to look for signs of past life.",
+      "climate": {
+        "ts_mean": -52,
+        "ts_max": -5,
+        "ts_min": -88,
+        "precip": 0,
+        "humidity": 0.01,
+        "pressure": 0.72,
+        "uv": 20,
+        "wind": 4
+      },
+      "ice": 0,
+      "volcanic": 0.5,
+      "impact": 1,
+      "uk": {
+        "name": "Кратер Єзеро",
+        "mission": "Місце посадки Perseverance",
+        "kind": "Кратерне озеро з дельтою",
+        "why": "Давнє кратерне озеро з дельтою річки — місце пошуку слідів минулого життя."
+      }
+    },
+    {
+      "id": "gale",
+      "name": "Gale crater",
+      "lat": -4.59,
+      "lon": 137.44,
+      "mission": "Curiosity landing site",
+      "kind": "Crater with layered mound",
+      "why": "Lake sediments stacked in a 5 km mound (Mount Sharp) inside a 154 km crater.",
+      "climate": {
+        "ts_mean": -48,
+        "ts_max": 0,
+        "ts_min": -85,
+        "precip": 0,
+        "humidity": 0.01,
+        "pressure": 0.85,
+        "uv": 20,
+        "wind": 4
+      },
+      "ice": 0,
+      "volcanic": 0.3,
+      "impact": 1,
+      "uk": {
+        "name": "Кратер Гейла",
+        "mission": "Місце посадки Curiosity",
+        "kind": "Кратер із шаруватою горою",
+        "why": "Озерні відклади, складені в 5-кілометрову гору (гора Шарпа) всередині 154-кілометрового кратера."
+      }
+    },
+    {
+      "id": "meridiani",
+      "name": "Meridiani Planum",
+      "lat": -1.95,
+      "lon": -5.53,
+      "mission": "Opportunity landing site",
+      "kind": "Sedimentary plain",
+      "why": "Flat plains of sulfate sandstone and hematite spherules formed in acidic groundwater.",
+      "climate": {
+        "ts_mean": -50,
+        "ts_max": 5,
+        "ts_min": -90,
+        "precip": 0,
+        "humidity": 0.01,
+        "pressure": 0.62,
+        "uv": 20,
+        "wind": 5
+      },
+      "ice": 0,
+      "volcanic": 0.2,
+      "impact": 0.6,
+      "uk": {
+        "name": "Плато Меридіана",
+        "mission": "Місце посадки Opportunity",
+        "kind": "Осадова рівнина",
+        "why": "Рівнини із сульфатного пісковику та гематитових кульок, що утворилися в кислих ґрунтових водах."
+      }
+    },
+    {
+      "id": "utopia",
+      "name": "Utopia Planitia",
+      "lat": 25.07,
+      "lon": 109.93,
+      "mission": "Zhurong (Tianwen-1) landing site",
+      "kind": "Lowland plain",
+      "why": "Vast lowland plains with buried ice and possible ancient ocean shoreline deposits.",
+      "climate": {
+        "ts_mean": -60,
+        "ts_max": -10,
+        "ts_min": -95,
+        "precip": 0,
+        "humidity": 0.01,
+        "pressure": 0.85,
+        "uv": 20,
+        "wind": 4
+      },
+      "ice": 0.6,
+      "volcanic": 0.5,
+      "impact": 0.6,
+      "uk": {
+        "name": "Рівнина Утопія",
+        "mission": "Місце посадки Zhurong (Tianwen-1)",
+        "kind": "Низинна рівнина",
+        "why": "Величезні низинні рівнини з похованим льодом і, можливо, берегами давнього океану."
+      }
+    },
+    {
+      "id": "arcadia",
+      "name": "Arcadia Planitia",
+      "lat": 40,
+      "lon": -160,
+      "mission": "Human landing study area (SWIM ice mapping)",
+      "kind": "Ice-rich plain",
+      "why": "Shallow water ice within a metre or two of the surface at latitudes still warm enough for crews.",
+      "climate": {
+        "ts_mean": -70,
+        "ts_max": -25,
+        "ts_min": -100,
+        "precip": 0,
+        "humidity": 0.01,
+        "pressure": 0.75,
+        "uv": 20,
+        "wind": 4
+      },
+      "ice": 1,
+      "volcanic": 0.5,
+      "impact": 0.5,
+      "uk": {
+        "name": "Рівнина Аркадія",
+        "mission": "Район для висадки людей (картування льоду SWIM)",
+        "kind": "Рівнина, багата на лід",
+        "why": "Водяний лід за метр-два під поверхнею на широтах, ще досить теплих для екіпажів."
+      }
+    },
+    {
+      "id": "deuteronilus",
+      "name": "Deuteronilus Mensae",
+      "lat": 44,
+      "lon": 23,
+      "mission": "Human exploration zone candidate",
+      "kind": "Buried glaciers",
+      "why": "Mesas wrapped in debris-covered glaciers — water for a base and a climate record.",
+      "climate": {
+        "ts_mean": -70,
+        "ts_max": -25,
+        "ts_min": -100,
+        "precip": 0,
+        "humidity": 0.01,
+        "pressure": 0.7,
+        "uv": 20,
+        "wind": 4
+      },
+      "ice": 1,
+      "volcanic": 0.2,
+      "impact": 0.6,
+      "uk": {
+        "name": "Столові гори Девтеронілу",
+        "mission": "Кандидат на зону досліджень людьми",
+        "kind": "Поховані льодовики",
+        "why": "Столові гори, оповиті вкритими уламками льодовиками, — вода для бази й літопис клімату."
+      }
+    },
+    {
+      "id": "phoenix",
+      "name": "Green Valley (Phoenix)",
+      "lat": 68.22,
+      "lon": -125.75,
+      "mission": "Phoenix landing site",
+      "kind": "Polar ice terrain",
+      "why": "Patterned ground over ice-cemented soil a few centimetres down; perchlorate salts.",
+      "climate": {
+        "ts_mean": -90,
+        "ts_max": -30,
+        "ts_min": -130,
+        "precip": 0,
+        "humidity": 0.01,
+        "pressure": 0.8,
+        "uv": 20,
+        "wind": 5
+      },
+      "ice": 1,
+      "volcanic": 0.2,
+      "impact": 0.4,
+      "uk": {
+        "name": "Зелена долина (Phoenix)",
+        "mission": "Місце посадки Phoenix",
+        "kind": "Полярний льодовий рельєф",
+        "why": "Полігональний ґрунт над зцементованим льодом за кілька сантиметрів углиб; перхлоратні солі."
+      }
+    },
+    {
+      "id": "arsia",
+      "name": "Arsia Mons cave skylights",
+      "lat": -8.26,
+      "lon": -120.09,
+      "mission": "Candidate lava-tube caves (Mars Odyssey THEMIS)",
+      "kind": "Cave / lava tube",
+      "why": "Pits on the flanks of a giant shield volcano open into lava tubes — natural shelters.",
+      "climate": {
+        "ts_mean": -60,
+        "ts_max": -10,
+        "ts_min": -100,
+        "precip": 0,
+        "humidity": 0.005,
+        "pressure": 0.25,
+        "uv": 20,
+        "wind": 6
+      },
+      "ice": 0,
+      "volcanic": 1,
+      "impact": 0.3,
+      "uk": {
+        "name": "Провали в печери гори Арсія",
+        "mission": "Ймовірні лавові печери (Mars Odyssey THEMIS)",
+        "kind": "Печера / лавова трубка",
+        "why": "Провали на схилах гігантського щитового вулкана ведуть у лавові трубки — природні укриття."
+      },
+      "cave": 1
+    },
+    {
+      "id": "insight",
+      "name": "Elysium Planitia (InSight)",
+      "lat": 4.5,
+      "lon": 135.62,
+      "mission": "InSight landing site",
+      "kind": "Volcanic plain",
+      "why": "Smooth, flat volcanic plains chosen as the safest possible landing ground.",
+      "climate": {
+        "ts_mean": -55,
+        "ts_max": -5,
+        "ts_min": -95,
+        "precip": 0,
+        "humidity": 0.01,
+        "pressure": 0.7,
+        "uv": 20,
+        "wind": 5
+      },
+      "ice": 0,
+      "volcanic": 0.8,
+      "impact": 0.5,
+      "uk": {
+        "name": "Рівнина Елізій (InSight)",
+        "mission": "Місце посадки InSight",
+        "kind": "Вулканічна рівнина",
+        "why": "Рівні вулканічні рівнини, обрані як найбезпечніший майданчик для посадки."
+      }
+    }
+  ]
+}

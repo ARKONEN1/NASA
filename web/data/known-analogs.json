@@ -1,0 +1,258 @@
+{
+  "_note": "Established terrestrial analog sites used by NASA/ESA field campaigns. Used only to test the method: a good similarity score should rank them high without being told about them. Coordinates are rounded to ~0.1°.",
+  "sites": [
+    {
+      "name": "Atacama Desert (Yungay)",
+      "lat": -24.1,
+      "lon": -70,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Hyperarid soils, life-detection rover tests",
+      "uk": {
+        "name": "Пустеля Атакама (Юнгай)",
+        "use": "Гіпераридні ґрунти, тести роверів для пошуку життя"
+      }
+    },
+    {
+      "name": "McMurdo Dry Valleys",
+      "lat": -77.5,
+      "lon": 161.8,
+      "bodies": [
+        "mars",
+        "moon"
+      ],
+      "use": "Cold, dry polar desert; permafrost",
+      "uk": {
+        "name": "Сухі долини Мак-Мердо",
+        "use": "Холодна суха полярна пустеля; вічна мерзлота"
+      }
+    },
+    {
+      "name": "Haughton crater, Devon Island",
+      "lat": 75.4,
+      "lon": -89.7,
+      "bodies": [
+        "mars",
+        "moon"
+      ],
+      "use": "Haughton-Mars Project: Arctic impact crater",
+      "uk": {
+        "name": "Кратер Хоутон, острів Девон",
+        "use": "Проєкт Haughton-Mars: арктичний імпактний кратер"
+      }
+    },
+    {
+      "name": "Mars Desert Research Station, Utah",
+      "lat": 38.4,
+      "lon": -110.8,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Habitat simulations on red sedimentary desert",
+      "uk": {
+        "name": "Марсіанська пустельна станція, Юта",
+        "use": "Імітації житла в червоній осадовій пустелі"
+      }
+    },
+    {
+      "name": "Death Valley",
+      "lat": 36.5,
+      "lon": -117,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Playas, alluvial fans, rover tests",
+      "uk": {
+        "name": "Долина Смерті",
+        "use": "Плаї, алювіальні конуси, тести роверів"
+      }
+    },
+    {
+      "name": "Rio Tinto",
+      "lat": 37.7,
+      "lon": -6.6,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Acidic iron-sulfate waters, drilling tests",
+      "uk": {
+        "name": "Ріо-Тінто",
+        "use": "Кислі залізисто-сульфатні води, тести буріння"
+      }
+    },
+    {
+      "name": "Qaidam Basin",
+      "lat": 37.5,
+      "lon": 94,
+      "bodies": [
+        "mars"
+      ],
+      "use": "High, cold, salty desert with yardangs",
+      "uk": {
+        "name": "Цайдамська западина",
+        "use": "Висока холодна солона пустеля з ярдангами"
+      }
+    },
+    {
+      "name": "Pilbara",
+      "lat": -21.1,
+      "lon": 119.4,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Ancient stromatolites; biosignature training",
+      "uk": {
+        "name": "Пілбара",
+        "use": "Давні строматоліти; навчання пошуку біосигнатур"
+      }
+    },
+    {
+      "name": "Dallol / Danakil Depression",
+      "lat": 14.2,
+      "lon": 40.3,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Extreme acidic hydrothermal brines",
+      "uk": {
+        "name": "Даллол / западина Данакіль",
+        "use": "Екстремальні кислі гідротермальні розсоли"
+      }
+    },
+    {
+      "name": "Svalbard (AMASE)",
+      "lat": 79,
+      "lon": 14,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Arctic volcanic springs and ice",
+      "uk": {
+        "name": "Шпіцберген (AMASE)",
+        "use": "Арктичні вулканічні джерела й лід"
+      }
+    },
+    {
+      "name": "Mauna Kea, Hawaii (PISCES)",
+      "lat": 19.8,
+      "lon": -155.5,
+      "bodies": [
+        "moon",
+        "mars"
+      ],
+      "use": "Basaltic regolith, ISRU and rover tests",
+      "uk": {
+        "name": "Мауна-Кеа, Гаваї (PISCES)",
+        "use": "Базальтовий реголіт, тести ISRU та роверів"
+      }
+    },
+    {
+      "name": "Black Point Lava Flow, Arizona (Desert RATS)",
+      "lat": 35.7,
+      "lon": -111.4,
+      "bodies": [
+        "moon"
+      ],
+      "use": "Lunar surface EVA and rover traverses",
+      "uk": {
+        "name": "Лавовий потік Блек-Пойнт, Аризона (Desert RATS)",
+        "use": "Відпрацювання виходів на поверхню та маршрутів роверів"
+      }
+    },
+    {
+      "name": "Meteor Crater, Arizona",
+      "lat": 35,
+      "lon": -111,
+      "bodies": [
+        "moon"
+      ],
+      "use": "Apollo astronaut geology training",
+      "uk": {
+        "name": "Метеоритний кратер, Аризона",
+        "use": "Геологічна підготовка астронавтів Apollo"
+      }
+    },
+    {
+      "name": "Craters of the Moon, Idaho",
+      "lat": 43.4,
+      "lon": -113.5,
+      "bodies": [
+        "moon",
+        "mars"
+      ],
+      "use": "Basalt flows, lava tubes, Apollo training",
+      "uk": {
+        "name": "Кратери Місяця, Айдахо",
+        "use": "Базальтові потоки, лавові трубки, підготовка Apollo"
+      }
+    },
+    {
+      "name": "Sudbury, Ontario",
+      "lat": 46.6,
+      "lon": -81.2,
+      "bodies": [
+        "moon"
+      ],
+      "use": "Apollo 16/17 impact-geology training",
+      "uk": {
+        "name": "Садбері, Онтаріо",
+        "use": "Підготовка Apollo 16/17 з ударної геології"
+      }
+    },
+    {
+      "name": "Ries crater, Germany",
+      "lat": 48.9,
+      "lon": 10.6,
+      "bodies": [
+        "moon"
+      ],
+      "use": "Apollo 14 training; Artemis geology",
+      "uk": {
+        "name": "Кратер Ріс, Німеччина",
+        "use": "Підготовка Apollo 14; геологія Artemis"
+      }
+    },
+    {
+      "name": "Lanzarote (ESA PANGAEA)",
+      "lat": 29,
+      "lon": -13.6,
+      "bodies": [
+        "moon",
+        "mars"
+      ],
+      "use": "Lava tubes and basaltic fields",
+      "uk": {
+        "name": "Лансароте (ESA PANGAEA)",
+        "use": "Лавові трубки й базальтові поля"
+      }
+    },
+    {
+      "name": "Iceland highlands (Askja)",
+      "lat": 65,
+      "lon": -16.7,
+      "bodies": [
+        "moon",
+        "mars"
+      ],
+      "use": "Apollo training; volcanic sand and lava",
+      "uk": {
+        "name": "Високогір’я Ісландії (Аск’я)",
+        "use": "Підготовка Apollo; вулканічний пісок і лава"
+      }
+    },
+    {
+      "name": "Mistastin Lake, Labrador",
+      "lat": 55.9,
+      "lon": -63.3,
+      "bodies": [
+        "moon"
+      ],
+      "use": "Impact into anorthosite — lunar highland rock",
+      "uk": {
+        "name": "Озеро Містастін, Лабрадор",
+        "use": "Удар в анортозит — породу місячних материків"
+      }
+    }
+  ]
+}

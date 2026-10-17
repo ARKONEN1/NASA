@@ -1,0 +1,25 @@
+{
+  "_note": "Confirmed exposed impact structures on land, after the Earth Impact Database (Planetary and Space Science Centre, University of New Brunswick). Coordinates rounded; d = rim diameter in km. Fully buried and offshore structures are left out because they do not offer cratered terrain at the surface.",
+  "craters": [
+    ["Meteor Crater", 35.03, -111.02, 1.2], ["Haughton", 75.38, -89.68, 23], ["Ries", 48.88, 10.62, 24],
+    ["Steinheim", 48.68, 10.07, 3.8], ["Sudbury", 46.6, -81.18, 130], ["Vredefort", -27.0, 27.5, 160],
+    ["Manicouagan", 51.38, -68.7, 100], ["Popigai", 71.65, 111.18, 100], ["Lonar", 19.98, 76.51, 1.8],
+    ["Wolfe Creek", -19.17, 127.8, 0.9], ["Gosses Bluff", -23.82, 132.31, 22], ["Tenoumer", 22.92, -10.4, 1.9],
+    ["Aorounga", 19.1, 19.25, 12.6], ["Gweni-Fada", 17.42, 21.75, 14], ["Roter Kamm", -27.77, 16.29, 2.5],
+    ["Tswaing", -25.4, 28.08, 1.1], ["Pingualuit", 61.28, -73.66, 3.4], ["Clearwater", 56.22, -74.5, 36],
+    ["Mistastin", 55.88, -63.3, 28], ["Bosumtwi", 6.5, -1.41, 10.5], ["El'gygytgyn", 67.5, 172.08, 18],
+    ["Siljan", 61.03, 14.87, 52], ["Lappajärvi", 63.15, 23.67, 23], ["Kara-Kul", 39.02, 73.45, 52],
+    ["Zhamanshin", 48.4, 60.97, 14], ["Monturaqui", -23.93, -68.26, 0.5], ["Henbury", -24.57, 133.15, 0.2],
+    ["Shoemaker", -25.87, 120.88, 30], ["Acraman", -32.02, 135.45, 90], ["Ouarkziz", 29.0, -7.55, 3.5],
+    ["Talemzane", 33.32, 4.03, 1.8], ["Amguid", 26.08, 4.38, 0.5], ["Tin Bider", 27.6, 5.12, 6],
+    ["BP structure", 25.32, 24.32, 2], ["Oasis", 24.58, 24.4, 18], ["Rochechouart", 45.82, 0.78, 23],
+    ["Charlevoix", 47.53, -70.3, 54], ["Sierra Madera", 30.6, -102.92, 13], ["Odessa", 31.76, -102.48, 0.2],
+    ["Spider", -16.73, 126.08, 13], ["Goat Paddock", -18.33, 126.67, 5.1], ["Strangways", -15.2, 133.58, 25],
+    ["Yarrabubba", -27.17, 118.83, 30], ["Araguainha", -16.78, -52.98, 40], ["Serra da Cangalha", -8.08, -46.87, 13.7],
+    ["Jebel Waqf as Suwwan", 31.05, 36.8, 5.5], ["Ramgarh", 25.33, 76.62, 10], ["Dhala", 25.3, 78.13, 11],
+    ["Xiuyan", 40.37, 123.46, 1.8], ["Logancha", 65.52, 95.93, 20], ["Kara", 69.1, 64.15, 65],
+    ["Puchezh-Katunki", 56.97, 43.72, 80], ["Boltysh", 48.9, 32.25, 24], ["Wanapitei", 46.75, -80.75, 7.5],
+    ["Slate Islands", 48.67, -87.0, 30], ["Saint Martin", 51.78, -98.53, 40], ["West Hawk", 49.77, -95.18, 2.4],
+    ["Tunnunik", 72.47, -113.95, 25], ["Kamil", 22.02, 26.09, 0.05], ["Wabar", 21.5, 50.47, 0.1]
+  ]
+}

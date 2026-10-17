@@ -1,0 +1,27 @@
+{
+  "_note": "Well-documented lava tubes and volcanic caves, compiled by hand from park, geological-survey and caving literature. There is no global catalogue, so the list is incomplete and coordinates are approximate (a few km). Used for the 'lava tube nearby' factor, which only applies to cave targets.",
+  "caves": [
+    { "name": "Kazumura Cave", "uk": "Печера Казумура", "where": "Hawaiʻi, USA", "lat": 19.50, "lon": -155.08 },
+    { "name": "Thurston Lava Tube", "uk": "Лавова трубка Терстон", "where": "Hawaiʻi, USA", "lat": 19.415, "lon": -155.238 },
+    { "name": "Cueva de los Verdes", "uk": "Куева-де-лос-Вердес", "where": "Lanzarote, Spain", "lat": 29.16, "lon": -13.44 },
+    { "name": "Cueva del Viento", "uk": "Куева-дель-Вьєнто", "where": "Tenerife, Spain", "lat": 28.36, "lon": -16.71 },
+    { "name": "Lava Beds tubes", "uk": "Лавові трубки Лава-Бедс", "where": "California, USA", "lat": 41.72, "lon": -121.51 },
+    { "name": "Ape Cave", "uk": "Печера Ейп", "where": "Washington, USA", "lat": 46.11, "lon": -122.21 },
+    { "name": "Indian Tunnel, Craters of the Moon", "uk": "Індіанський тунель, Кратери Місяця", "where": "Idaho, USA", "lat": 43.43, "lon": -113.56 },
+    { "name": "El Malpais Big Tubes", "uk": "Великі трубки Ель-Мальпаїс", "where": "New Mexico, USA", "lat": 34.94, "lon": -108.10 },
+    { "name": "Undara Lava Tubes", "uk": "Лавові трубки Ундара", "where": "Queensland, Australia", "lat": -18.20, "lon": 144.58 },
+    { "name": "Raufarhólshellir", "uk": "Рейварголсгетлір", "where": "Iceland", "lat": 63.93, "lon": -21.40 },
+    { "name": "Surtshellir", "uk": "Сюртсгетлір", "where": "Iceland", "lat": 64.78, "lon": -20.70 },
+    { "name": "Lofthellir", "uk": "Лофтгетлір", "where": "Iceland", "lat": 65.60, "lon": -16.85 },
+    { "name": "Manjanggul", "uk": "Манджангуль", "where": "Jeju, South Korea", "lat": 33.53, "lon": 126.77 },
+    { "name": "Umm Jirsan", "uk": "Умм-Джирсан", "where": "Harrat Khaybar, Saudi Arabia", "lat": 25.58, "lon": 39.80 },
+    { "name": "Leviathan Cave", "uk": "Печера Левіафан", "where": "Chyulu Hills, Kenya", "lat": -2.65, "lon": 37.90 },
+    { "name": "Mount Suswa caves", "uk": "Печери гори Сусва", "where": "Kenya", "lat": -1.17, "lon": 36.35 },
+    { "name": "Etna lava tubes", "uk": "Лавові трубки Етни", "where": "Sicily, Italy", "lat": 37.80, "lon": 15.02 },
+    { "name": "Santa Cruz lava tunnels", "uk": "Лавові тунелі Санта-Крус", "where": "Galápagos, Ecuador", "lat": -0.65, "lon": -90.40 },
+    { "name": "Gruta do Carvão", "uk": "Грута-ду-Карвау", "where": "São Miguel, Azores", "lat": 37.75, "lon": -25.67 },
+    { "name": "Algar do Carvão", "uk": "Алгар-ду-Карвау", "where": "Terceira, Azores", "lat": 38.73, "lon": -27.22 },
+    { "name": "Fugaku Wind Cave", "uk": "Вітряна печера Фуґаку", "where": "Mount Fuji, Japan", "lat": 35.47, "lon": 138.62 },
+    { "name": "Pahoehoe tubes of Payún Matrú", "uk": "Трубки Паюн-Матру", "where": "Mendoza, Argentina", "lat": -36.42, "lon": -69.20 }
+  ]
+}
