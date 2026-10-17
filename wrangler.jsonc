@@ -1,0 +1,9 @@
+// Cloudflare Workers deployment (static site only, no server code).
+// Workers Builds runs: build `npm run build` (checks the prebuilt site in web/), deploy `npx wrangler deploy`.
+// The data in web/data is prebuilt locally (`npm run data && npm run build:data`) and committed.
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "analog-atlas",
+  "compatibility_date": "2026-09-01",
+  "assets": { "directory": "./web" }
+}

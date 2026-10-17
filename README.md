@@ -39,12 +39,21 @@ Earth can't match the Moon or Mars in absolute terms. So each factor is ranked a
 
 ## Run locally
 
-Requires Node 18+.
+Requires Node 18+. The site in `web/` is static and its data is prebuilt, so serving it is enough:
 
 ```bash
 npm install
-npm run data      # download NASA/NOAA/Smithsonian data (~20 min, POWER is rate-limited)
-npm run build     # build the Earth grid and Moon/Mars targets
-npm run validate  # method check printed to the console
 npm run serve     # http://localhost:5180
 ```
+
+To rebuild the data from the sources:
+
+```bash
+npm run data        # download NASA/NOAA/Smithsonian data (~20 min, POWER is rate-limited)
+npm run build:data  # Earth grid, Moon/Mars targets, site maps → web/data
+npm run validate    # method check printed to the console
+```
+
+## Deploy (Cloudflare Workers)
+
+`wrangler.jsonc` serves `web/` as static assets, with no server code. In Workers Builds, set the build command to `npm run build` (it only checks that every data file is present and under the 25 MiB asset limit) and the deploy command to `npx wrangler deploy`.

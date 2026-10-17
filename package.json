@@ -6,13 +6,16 @@
   "description": "Find Earth places that share conditions with Moon base and Mars landing sites, from open NASA data.",
   "scripts": {
     "data": "node tools/fetch-etopo.mjs && node tools/fetch-landcover.mjs && node tools/fetch-basemap.mjs && node tools/fetch-static.mjs && node tools/fetch-power.mjs",
-    "build": "node tools/build-targets.mjs && node tools/build-bodymaps.mjs && node tools/build-grid.mjs",
+    "build:data": "node tools/build-targets.mjs && node tools/build-bodymaps.mjs && node tools/build-grid.mjs",
     "validate": "node tools/validate.mjs",
-    "serve": "node tools/serve.mjs 5180"
+    "build": "node tools/check-site.mjs",
+    "serve": "node tools/serve.mjs 5180",
+    "deploy": "npm run build && npx wrangler deploy"
   },
   "devDependencies": {
     "leaflet": "^1.9.4",
     "netcdfjs": "^3.0.0",
-    "pngjs": "^7.0.0"
+    "pngjs": "^7.0.0",
+    "wrangler": "^4.151.1"
   }
 }
