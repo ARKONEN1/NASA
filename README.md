@@ -14,8 +14,11 @@ The interface is in English and Ukrainian (switch in the header).
 2. Pick what you want to test: rovers and spacewalks, habitats, ice mining, field geology, or light and power.
 3. The map colours every land cell on Earth (about 55 km) by how alike it is. The best places are listed, each tagged **new** or **known** (within 150 km of an established analog site).
 4. Each place gets a card: land cover, height, climate in one line, the nearest named volcano, impact crater and lava tube, a factor-by-factor comparison, and shaded relief of both places side by side.
-5. The top 50 places can be downloaded as CSV or GeoJSON, with every factor value and its match.
-6. **Does the method work?** Established NASA/ESA field sites are never shown to the model. The app reports where they rank for the current choice; a random place would sit at 50 %. The app also shows which factors make the known sites stand out and which do not. Where they give no lift, those sites were picked for other reasons and cannot vouch for that factor.
+5. Each place also gets a **fingerprint** (radar of all factors on Earth's scale, target vs place), **terrain up close** (20 km window, 0.48 km baseline: ESA Copernicus DEM on Earth, LOLA on the Moon, MOLA on Mars), **robustness** (see below) and **logistics** (nearest town and airport).
+6. **Dossier (PDF):** one printable page per candidate, with score, robustness, logistics, images, fingerprint, fit for every purpose and all factors.
+7. **Discoveries:** a five-step guided tour of the main findings. Every view has a shareable link, e.g. `#/mars/arsia/geology/25.5,40`.
+8. The top 50 places can be downloaded as CSV or GeoJSON, with every factor value, its match, robustness, logistics and terrain up close.
+9. **Does the method work?** Established NASA/ESA field sites are never shown to the model. The app reports where they rank for the current choice; a random place would sit at 50 %. The app also shows which factors make the known sites stand out and which do not. Where they give no lift, those sites were picked for other reasons and cannot vouch for that factor.
 
 ## Method
 
@@ -30,10 +33,13 @@ The interface is in English and Ukrainian (switch in the header).
 | Impact cratering | distance to exposed confirmed craters (Earth Impact Database) | 0–1 from site geology |
 | Low sun | latitude | latitude |
 | Lava tube nearby | distance to a hand-compiled list of 22 well-documented lava tubes | only for cave sites (Marius Hills, Arsia Mons, Hadley Rille) |
+| Terrain up close (shown, not scored) | ESA Copernicus DEM GLO-30, 240 m level, for 1,525 candidates | LOLA 240 m / LDEM_64; MOLA 128 px/deg |
 
 Earth can't match the Moon or Mars in absolute terms. So each factor is ranked among Earth's land (area-weighted percentile), and a value beyond Earth's range points to Earth's most extreme end. Similarity per factor = 1 − |percentile difference|, and the score is a weighted mean with weights set by the chosen purpose.
 
 **Method check (full data):** across all sites and purposes, known analogs have a median rank between 64 % and 98 % (random = 50 %). The weakest case is Moon × Habitats (64 %). The diagnosis is that known lunar analogs (Hawaiʻi, Arizona, Ries, Sudbury) were chosen for geology and terrain, not climate, so they show no lift in temperature, rain or air pressure. There is no ground truth for lunar thermal analogs on Earth.
+
+**Robustness:** every candidate is re-scored 60 times with each weight scaled by a random factor in [0.5, 1.5] and each target position shifted by ±0.05 on Earth's scale (seeded, reproducible). Across all 90 top-10 lists (15 sites × 6 purposes), 93.4 % of places stay in the top 1 % of Earth's land in at least 90 % of runs, and the first place does so in 89 of 90 lists. Run `node tools/robustness.mjs`.
 
 **Limits:** gravity, vacuum and radiation can't be matched, so every analog is partial. The 0.5° grid doesn't resolve single caves or crater rims. Moon and Mars climate figures are rounded literature values. The lava-tube list is hand-compiled and incomplete. The geology check is partly circular, because some known analogs are famous for the very craters and volcanoes in the catalogues.
 

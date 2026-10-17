@@ -1,12 +1,14 @@
 import {
   FACTORS, FACTOR_KEYS, PURPOSES, buildModel, targetProfile, scoreAll, rankAll,
-  topSites, nearestCell, bestCellNear, explain, distanceKm,
+  topSites, nearestCell, bestCellNear, explain, distanceKm, stabilityRunner, allPurposes,
 } from './model.js';
 import { t, getLang, setLang, applyStatic, STRINGS } from './i18n.js';
+import { radarSvg, detailRows, logistics } from './extras.js';
 
 const $ = (s) => document.querySelector(s);
 const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1 };
-let model, targets, known, meta, places, bodymaps, scores, ranks, prof, tops = [];
+let model, targets, known, meta, places, bodymaps, detail = {}, logi, scores, ranks, prof, tops = [];
+let stab = new Map(), stabJob = 0; // robustness results for the current choice
 
 // ---------- text helpers ----------
 const S = () => STRINGS[getLang()];
@@ -271,7 +273,7 @@ function renderSites() {
     li.innerHTML = `<span class="n">${k + 1}</span>
       <div><div class="where">${esc(countryOf(i))}${kn ? `<span class="tag known" title="${esc(t('knownNear', { name: tx(kn, 'name') }))}">${t('tagKnown')}</span>` : `<span class="tag new">${t('tagNew')}</span>`}</div>
       <div class="why">${fmtCoords(model.col.lat[i], model.col.lon[i])} · ${esc(whyLine(i))}</div></div>
-      <div class="score">${Math.round(scores[i] * 100)}<small>${topShare(ranks[i])}</small></div>`;
+      <div class="score">${Math.round(scores[i] * 100)}<small>${topShare(ranks[i])}</small><small class="stab${(stab.get(i) ?? 1) < 0.8 ? ' weak' : ''}" title="${esc(t('stabilityHint'))}">${stabText(i)}</small></div>`;
     li.onclick = () => select(i);
     li.onkeydown = (e) => { if (e.key === 'Enter') select(i); };
     ol.append(li);
@@ -329,7 +331,7 @@ function renderCompare() {
         <span class="title">${esc(tName)}</span>
         <span class="coords">${fmtCoords(tg.lat, tg.lon)}</span>
         <div class="cmp-imgs">
-          <div class="cmp-img"><img src="data/thumbs/${tg.id}.png" alt=""><span>${t('relief')} · ${targets.thumbKm} km</span></div>
+          <div class="cmp-img"><img src="data/thumbs/${tg.id}.png" alt=""><span>${t('relief')} · ${targets.thumbKm} ${t('km')}</span></div>
           <p class="cmp-why">${esc(tx(tg, 'why'))}</p>
         </div>
       </div>
@@ -339,13 +341,20 @@ function renderCompare() {
         <span class="coords">${fmtCoords(la, lo)}</span>
         <p class="site-facts">${siteFacts(i)}</p>
         ${nearbyHtml(la, lo)}
+        ${logisticsHtml(la, lo)}
         <div class="cmp-imgs">
-          <div class="cmp-img"><img loading="lazy" src="${gibs('ASTER_GDEM_Greyscale_Shaded_Relief', la, lo)}" alt=""><span>${t('relief')} · 150 km</span></div>
+          <div class="cmp-img"><img loading="lazy" src="${gibs('ASTER_GDEM_Greyscale_Shaded_Relief', la, lo)}" alt=""><span>${t('relief')} · 150 ${t('km')}</span></div>
           <div class="cmp-img"><img loading="lazy" src="${gibs('BlueMarble_NextGeneration', la, lo)}" alt=""><span>${t('blueMarble')}</span></div>
         </div>
       </div>
     </div>
-    <div class="cmp-score"><strong>${Math.round(scores[i] * 100)}</strong><span>${esc(t('scoreLine', { share: topShare(ranks[i]), purpose: lowerFirst(pName(state.purpose)) }))}</span></div>
+    <div class="cmp-score"><strong>${Math.round(scores[i] * 100)}</strong><span>${esc(t('scoreLine', { share: topShare(ranks[i]), purpose: lowerFirst(pName(state.purpose)) }))}</span>
+      <span class="stab-line" title="${esc(t('stabilityHint'))}">${stabText(i)}</span>
+      <button class="dossier-btn" id="dossier-btn">${t('dossierBtn')}</button></div>
+    <div class="cmp-grid">
+      <div class="radar-box"><h3>${t('radarTitle')}</h3>${radarSvg(model, prof, state.weights, i, { label: fShort, earthLabel: t('earth'), targetLabel: tName })}<p class="hint">${t('radarHint')}</p></div>
+      <div class="detail-box"><h3>${t('detailTitle')}</h3>${detailHtml(i, tg)}</div>
+    </div>
     <table class="factors"><thead><tr><th>${t('colFactor')}</th><th class="num">${t('colEarth')}</th><th class="num">${esc(t(state.body))}</th><th>${t('colMatch')}</th></tr></thead><tbody>`;
   let group = '';
   for (const r of explain(model, i, prof, state.weights)) {
@@ -359,6 +368,26 @@ function renderCompare() {
       <td><div class="bar"><i style="width:${Math.max(3, sim * 100)}%;background:rgb(${cr},${cg},${cb})"></i></div></td></tr>`;
   }
   body.innerHTML = html + '</tbody></table>';
+  $('#dossier-btn').onclick = () => openDossier(i);
+}
+
+const cellKey = (i) => `${model.col.lat[i]},${model.col.lon[i]}`;
+function detailHtml(i, tg) {
+  const e = detail[cellKey(i)];
+  if (!e) return `<p class="hint">${t('detailNone')}</p>`;
+  const rows = detailRows(e, tg.detail);
+  const fmt = (k, v) => (!Number.isFinite(v) ? '—' : k === 'relief' ? `${num(v, 0)} ${t('m')}` : k.startsWith('pct') ? `${num(v, v < 10 ? 1 : 0)}%` : `${num(v, 1)}°`);
+  return `<table class="factors compact"><thead><tr><th></th><th class="num">${t('colEarth')}</th><th class="num">${esc(t(state.body))}</th><th>${t('colMatch')}</th></tr></thead><tbody>${rows.map((r) => {
+    const sim = Number.isFinite(r.sim) ? r.sim : 0, [cr, cg, cb] = ramp(0.25 + sim * 0.75);
+    return `<tr><td>${t('d_' + r.k)}</td><td class="num">${fmt(r.k, r.earth)}</td><td class="num">${fmt(r.k, r.target)}</td><td><div class="bar"><i style="width:${Math.max(3, sim * 100)}%;background:rgb(${cr},${cg},${cb})"></i></div></td></tr>`;
+  }).join('')}</tbody></table><p class="hint">${t('detailHint')}</p>`;
+}
+function logisticsHtml(la, lo) {
+  const { town, airport } = logistics(logi, la, lo);
+  const items = [];
+  if (town) items.push(t('nearTown', { name: town.p[0], d: Math.round(town.d) }));
+  if (airport) items.push(t('nearAirport', { name: getLang() === 'uk' ? airport.p[1] : airport.p[0], code: airport.p[2] ? ` (${airport.p[2]})` : '', d: Math.round(airport.d) }));
+  return items.length ? `<ul class="near-list logi">${items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
 }
 
 // Which factors make the known sites stand out from ordinary land — and which do not.
@@ -412,7 +441,26 @@ function select(i, { pan = true } = {}) {
   selRect = L.rectangle([[la - dLat / 2, lo - dLon / 2], [la + dLat / 2, lo + dLon / 2]], { color: '#fff', weight: 2, fill: false, interactive: false }).addTo(map);
   if (pan) map.panTo([la, lo]);
   drawPins(); renderSites(); renderCompare();
+  writeHash();
+  if (stabAsked.size) runStability([i]);
 }
+
+// ---------- robustness (runs in the background, a few re-scorings per frame) ----------
+const worker = new Worker('js/stability-worker.js', { type: 'module' });
+const stabSig = () => `${state.targetId}|${state.purpose}|${JSON.stringify(state.weights)}`;
+const stabAsked = new Set();
+function runStability(cells) {
+  const todo = cells.filter((i) => !stab.has(i) && !stabAsked.has(i));
+  if (!todo.length) return;
+  todo.forEach((i) => stabAsked.add(i));
+  worker.postMessage({ sig: stabSig(), prof, weights: state.weights, cells: todo });
+}
+worker.onmessage = (e) => {
+  if (e.data.sig !== stabSig()) return; // a newer choice was made meanwhile
+  for (const [i, v] of e.data.result) stab.set(i, v);
+  renderSites(); renderCompare();
+};
+const stabText = (i) => (stab.has(i) ? t('stability', { v: Math.round(stab.get(i) * 100) }) : t('stabilityPending'));
 
 function recompute() {
   prof = targetProfile(model, target());
@@ -422,7 +470,12 @@ function recompute() {
   computeMeanSim();
   drawScoreLayer();
   renderCheck();
-  select(tops[0], { pan: false });
+  stab = new Map();
+  stabAsked.clear();
+  select(state.pendingCell ?? tops[0], { pan: !!state.pendingCell });
+  state.pendingCell = null;
+  runStability(tops);
+  runStability([state.selected]);
 }
 
 // ---------- export ----------
@@ -437,7 +490,13 @@ function exportRows() {
       top_percent: +((1 - ranks[i]) * 100).toFixed(2), status: kn ? 'known' : 'new', known_site: kn?.name ?? '',
       land_cover: STRINGS.en.landcover[model.col.lc_major[i]] ?? '', elevation_m: Math.round(model.col.elev[i]),
       target: tg.name, target_lat: tg.lat, target_lon: tg.lon, purpose: STRINGS.en.purposes[state.purpose][0],
+      stability: stab.has(i) ? +stab.get(i).toFixed(2) : '',
     };
+    const lg = logistics(logi, model.col.lat[i], model.col.lon[i]);
+    row.nearest_town = lg.town?.p[0] ?? ''; row.nearest_town_km = lg.town ? Math.round(lg.town.d) : '';
+    row.nearest_airport = lg.airport ? `${lg.airport.p[0]}${lg.airport.p[2] ? ' (' + lg.airport.p[2] + ')' : ''}` : ''; row.nearest_airport_km = lg.airport ? Math.round(lg.airport.d) : '';
+    const d = detail[cellKey(i)];
+    ['slope_median_deg', 'slope_p90_deg', 'slopes_over_10deg_pct', 'slopes_over_20deg_pct', 'relief_20km_m'].forEach((k, j) => { row[k] = d ? d[j] : ''; });
     for (const r of explain(model, i, prof, state.weights)) {
       row[r.f] = Number.isFinite(r.earth) ? +r.earth.toFixed(3) : '';
       row[`${r.f}_match`] = Number.isFinite(r.sim) ? +r.sim.toFixed(3) : '';
@@ -467,7 +526,119 @@ $('#export-geojson').onclick = () => {
 function renderAll() {
   applyStatic(); renderLang(); renderBodies(); renderTargets(); renderPurposes(); renderWeights(); renderSources(); drawKnown(); drawCaves();
   if (scores) { renderCheck(); drawPins(); renderSites(); renderCompare(); }
+  if (tourStep >= 0) showTour(tourStep, false);
 }
+
+// ---------- shareable links: #/body/site/purpose/lat,lon ----------
+function writeHash() {
+  if (state.selected < 0) return;
+  const h = `#/${state.body}/${state.targetId}/${state.purpose}/${model.col.lat[state.selected]},${model.col.lon[state.selected]}`;
+  if (location.hash !== h) history.replaceState(null, '', h);
+}
+function readHash() {
+  const [body, id, purpose, cell] = location.hash.replace(/^#\/?/, '').split('/');
+  if (!targets[body]?.some((x) => x.id === id)) return;
+  state.body = body;
+  state.targetId = id;
+  if (PURPOSES[purpose]) {
+    state.purpose = purpose;
+    state.weights = Object.fromEntries(FACTOR_KEYS.map((f) => [f, PURPOSES[purpose].w[f] || 0]));
+  }
+  const [la, lo] = (cell || '').split(',').map(Number);
+  if (Number.isFinite(la) && Number.isFinite(lo)) {
+    const i = nearestCell(model, la, lo, 80);
+    if (i >= 0) state.pendingCell = i;
+  }
+}
+
+/** Switch the whole view to a body / site / purpose and open one Earth place (used by the tour). */
+function goTo(body, id, purpose, la, lo, zoom = 3) {
+  state.body = body;
+  state.targetId = id;
+  state.purpose = purpose;
+  state.weights = Object.fromEntries(FACTOR_KEYS.map((f) => [f, PURPOSES[purpose].w[f] || 0]));
+  document.body.dataset.body = body;
+  const i = nearestCell(model, la, lo, 80);
+  if (i >= 0) state.pendingCell = i;
+  renderBodies(); renderTargets(); renderPurposes(); renderWeights(); drawKnown();
+  recompute();
+  map.setView([la, lo], zoom);
+}
+
+// ---------- site dossier: one printable page per candidate ----------
+async function openDossier(i) {
+  const tg = target(), la = model.col.lat[i], lo = model.col.lon[i], kn = knownNear(i);
+  const all = allPurposes(model, prof, i);
+  const rows = explain(model, i, prof, state.weights);
+  const box = $('#dossier');
+  const purposeRows = Object.keys(PURPOSES).map((p) => `<tr${p === state.purpose ? ' class="cur"' : ''}><td>${esc(pName(p))}</td><td class="num">${Math.round(all[p].score * 100)}</td><td class="num">${esc(topShare(1 - all[p].top))}</td></tr>`).join('');
+  const factorRows = rows.map((r) => `<tr${r.weight > 0 ? '' : ' class="off"'}><td>${esc(fShort(r.f))}</td><td class="num">${fmtValue(r.f, r.earth)}</td><td class="num">${fmtValue(r.f, r.target)}</td><td class="num">${Number.isFinite(r.sim) ? Math.round(r.sim * 100) + '%' : '—'}</td></tr>`).join('');
+  box.innerHTML = `
+    <header class="ds-head">
+      <div><div class="ds-kicker">${t('dossierKicker')}</div>
+        <h1>${esc(countryOf(i))} · ${fmtCoords(la, lo)}</h1>
+        <p>${t('dossierFor', { target: esc(tx(tg, 'name')), body: esc(t(state.body)), purpose: esc(lowerFirst(pName(state.purpose))) })}</p></div>
+      <div class="ds-score"><b>${Math.round(scores[i] * 100)}</b><span>${esc(topShare(ranks[i]))}</span><span>${stabText(i)}</span>
+        <span class="tag ${kn ? 'known' : 'new'}">${kn ? `${t('tagKnown')}: ${esc(tx(kn, 'name'))}` : t('tagNew')}</span></div>
+    </header>
+    <section class="ds-cols">
+      <div><h2>${t('earth')}</h2><p class="site-facts">${siteFacts(i)}</p>${nearbyHtml(la, lo)}${logisticsHtml(la, lo)}
+        <h2>${t('dossierWhy')}</h2><p>${esc(whyLine(i))}</p></div>
+      <div><h2>${esc(t(state.body))} · ${esc(tx(tg, 'kind'))}</h2><p><b>${esc(tx(tg, 'name'))}</b>, ${fmtCoords(tg.lat, tg.lon)}. ${esc(tx(tg, 'mission'))}.</p><p>${esc(tx(tg, 'why'))}</p></div>
+    </section>
+    <section class="ds-imgs">
+      <figure><img src="data/thumbs/${tg.id}.png" alt=""><figcaption>${esc(tx(tg, 'name'))} · ${t('relief')} 150 ${t('km')}</figcaption></figure>
+      <figure><img src="${gibs('ASTER_GDEM_Greyscale_Shaded_Relief', la, lo, 150, 480)}" alt=""><figcaption>${t('earth')} · ${t('relief')} 150 ${t('km')}</figcaption></figure>
+      <figure><img src="${gibs('BlueMarble_NextGeneration', la, lo, 150, 480)}" alt=""><figcaption>${t('earth')} · ${t('blueMarble')}</figcaption></figure>
+    </section>
+    <section class="ds-cols">
+      <div><h2>${t('radarTitle')}</h2>${radarSvg(model, prof, state.weights, i, { label: fShort, earthLabel: t('earth'), targetLabel: tx(tg, 'name') })}</div>
+      <div><h2>${t('dossierPurposes')}</h2><table class="ds-table"><thead><tr><th>${t('stepPurpose')}</th><th class="num">/100</th><th class="num">${t('dossierShare')}</th></tr></thead><tbody>${purposeRows}</tbody></table>
+        <h2>${t('detailTitle')}</h2>${detailHtml(i, tg)}</div>
+    </section>
+    <section><h2>${t('dossierFactors')}</h2><table class="ds-table"><thead><tr><th>${t('colFactor')}</th><th class="num">${t('colEarth')}</th><th class="num">${esc(t(state.body))}</th><th class="num">${t('colMatch')}</th></tr></thead><tbody>${factorRows}</tbody></table></section>
+    <footer class="ds-foot">${t('dossierFoot')} · ${esc(location.href)}</footer>`;
+  await Promise.all([...box.querySelectorAll('img')].map((im) => (im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; }))));
+  document.body.classList.add('printing-dossier');
+  window.print();
+  setTimeout(() => document.body.classList.remove('printing-dossier'), 500);
+}
+
+// ---------- discoveries tour ----------
+const TOUR = [
+  { body: 'mars', id: 'jezero', purpose: 'balanced', ll: [-24.0, -68.75] },
+  { body: 'mars', id: 'arsia', purpose: 'geology', ll: [25.5, 40.0] },
+  { body: 'mars', id: 'arcadia', purpose: 'ice', ll: [82.0, -19.375] },
+  { body: 'moon', id: 'shackleton', purpose: 'balanced', ll: [39.0, 73.75] },
+  { body: 'moon', id: 'hadley', purpose: 'rover', ll: [-24.0, -68.125] },
+];
+let tourStep = -1;
+function showTour(k, move = true) {
+  tourStep = k;
+  const s = TOUR[k], box = $('#tour');
+  if (move) goTo(s.body, s.id, s.purpose, s.ll[0], s.ll[1], 4);
+  box.hidden = false;
+  box.innerHTML = `<div class="tour-step">${k + 1} / ${TOUR.length}</div>
+    <h3>${t(`tour${k}h`)}</h3><p>${t(`tour${k}p`)}</p>
+    <div class="tour-nav"><button id="tour-prev" ${k === 0 ? 'disabled' : ''}>←</button>
+      <button id="tour-next" class="primary">${k === TOUR.length - 1 ? t('tourDone') : t('tourNext')}</button>
+      <button id="tour-close" aria-label="${t('tourClose')}">×</button></div>`;
+  $('#tour-prev').onclick = () => showTour(k - 1);
+  $('#tour-next').onclick = () => (k === TOUR.length - 1 ? closeTour() : showTour(k + 1));
+  $('#tour-close').onclick = closeTour;
+  if (move) $('.map-wrap').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function closeTour() { tourStep = -1; $('#tour').hidden = true; }
+$('#tour-btn').onclick = () => showTour(0);
+
+// A pasted link, or back / forward, changes only the hash: follow it.
+window.addEventListener('hashchange', () => {
+  if (!model) return;
+  readHash();
+  document.body.dataset.body = state.body;
+  renderBodies(); renderTargets(); renderPurposes(); renderWeights(); drawKnown();
+  recompute();
+});
 
 // ---------- intro (can be hidden; remembered per browser) ----------
 try { if (localStorage.getItem('introHidden') === '1') $('#intro').hidden = true; } catch {}
@@ -478,21 +649,28 @@ $('.method-link').addEventListener('click', () => { $('#intro').hidden = false; 
 applyStatic(); renderLang();
 (async () => {
   try {
-    const [m, bin, tg, kn, pl, bm] = await Promise.all([
+    const [m, bin, tg, kn, pl, bm, lg, dt] = await Promise.all([
       fetch('data/earth-meta.json').then((r) => r.json()),
       fetch('data/earth-cells.bin').then((r) => r.arrayBuffer()),
       fetch('data/targets.json').then((r) => r.json()),
       fetch('data/known-analogs.json').then((r) => r.json()),
       fetch('data/places.json').then((r) => r.json()),
       fetch('data/bodymaps.json').then((r) => r.json()),
+      fetch('data/logistics.json').then((r) => r.json()),
+      fetch('data/detail.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
     ]);
+    logi = lg;
+    detail = dt;
     places = pl;
     bodymaps = bm;
     meta = m;
     model = buildModel(meta, bin);
+    worker.postMessage({ init: true, meta, bin: bin.slice(0) });
     targets = tg;
     known = kn.sites;
     state.targetId = targets.moon[0].id;
+    readHash();
+    document.body.dataset.body = state.body;
     renderAll();
     recompute();
     $('#map-status').classList.add('hidden');

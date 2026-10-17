@@ -4,7 +4,8 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { ROOT, RAW, WEB_DATA, log } from './lib.mjs';
 import { PNG } from 'pngjs';
-import { makeDem, terrainAt } from './terrain.mjs';
+import { makeDem, terrainAt, detailAt } from './terrain.mjs';
+import { moon64Sampler } from './moon64.mjs';
 import { moonSouthPolar } from './moon-polar.mjs';
 import { ensureMars128, mars128Sampler } from './mars128.mjs';
 
@@ -86,7 +87,16 @@ for (const [body, cfg] of Object.entries(BODIES)) {
     hillshade(sample, t.lat, t.lon, cfg.radiusKm, path.join(THUMBS, `${t.id}.png`));
     const terr = terrainAt(sample, t.lat, t.lon, cfg.radiusKm);
     log(body, t.id.padEnd(14), `relief ${terr.relief.toFixed(0)} m  slope ${terr.slope.toFixed(2)}°  elev ${terr.elev.toFixed(0)} m`);
-    out[body].push({ ...t, terrain: { relief: +terr.relief.toFixed(1), slope: +terr.slope.toFixed(3), elev: Math.round(terr.elev) } });
+    // Landing-ellipse scale (0.48 km): Mars from the 128 px/deg band, the Moon from the 240 m polar
+    // grid near the pole and LDEM_64 (474 m) elsewhere.
+    let fine = sample;
+    if (body === 'moon' && t.lat >= -75.5) {
+      const m64 = await moon64Sampler(t.id, t.lat);
+      fine = (la, lo) => { const v = m64(la, lo); return Number.isFinite(v) ? v : sample(la, lo); };
+    }
+    const detail = detailAt(fine, t.lat, t.lon, cfg.radiusKm);
+    log('   detail', JSON.stringify(detail));
+    out[body].push({ ...t, terrain: { relief: +terr.relief.toFixed(1), slope: +terr.slope.toFixed(3), elev: Math.round(terr.elev) }, detail });
   }
 }
 fs.writeFileSync(path.join(WEB_DATA, 'targets.json'), JSON.stringify({

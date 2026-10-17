@@ -34,6 +34,43 @@ function offset(lat, lon, x, y, R) {
   return [phi / D2R, lon + lam / D2R];
 }
 
+// Detailed terrain at the scale of a landing ellipse: a 20 x 20 km window sampled every 0.48 km —
+// the finest baseline that exists on all three bodies (Copernicus 240 m, LOLA 240 m / 474 m, MOLA 463 m).
+export const DETAIL_STEP_KM = 0.48;
+export const DETAIL_HALF = 21; // 43 x 43 samples ≈ 20 km
+
+/** [median slope °, 90th-percentile slope °, % of slopes > 10°, % > 20°, relief p95–p5 m] or null. */
+export function detailAt(sample, lat, lon, radiusKm) {
+  const n = 2 * DETAIL_HALF + 1;
+  const z = new Float64Array(n * n);
+  let valid = 0;
+  for (let j = 0; j < n; j++)
+    for (let i = 0; i < n; i++) {
+      const [la, lo] = offset(lat, lon, (i - DETAIL_HALF) * DETAIL_STEP_KM, (j - DETAIL_HALF) * DETAIL_STEP_KM, radiusKm);
+      const v = sample(la, lo);
+      z[j * n + i] = v;
+      if (Number.isFinite(v)) valid++;
+    }
+  if (valid < n * n * 0.6) return null;
+  const slopes = [];
+  const base = 2 * DETAIL_STEP_KM * 1000;
+  for (let j = 1; j < n - 1; j++)
+    for (let i = 1; i < n - 1; i++) {
+      const gx = (z[j * n + i + 1] - z[j * n + i - 1]) / base, gy = (z[(j + 1) * n + i] - z[(j - 1) * n + i]) / base;
+      if (Number.isFinite(gx) && Number.isFinite(gy)) slopes.push(Math.atan(Math.hypot(gx, gy)) / D2R);
+    }
+  if (!slopes.length) return null;
+  slopes.sort((a, b) => a - b);
+  const q = (a, p) => a[Math.min(a.length - 1, Math.floor(a.length * p))];
+  const zs = Array.from(z).filter(Number.isFinite).sort((a, b) => a - b);
+  return [
+    +q(slopes, 0.5).toFixed(2), +q(slopes, 0.9).toFixed(2),
+    +((100 * slopes.filter((s) => s > 10).length) / slopes.length).toFixed(1),
+    +((100 * slopes.filter((s) => s > 20).length) / slopes.length).toFixed(1),
+    Math.round(q(zs, 0.95) - q(zs, 0.05)),
+  ];
+}
+
 /** Terrain metrics around (lat, lon). sample(lat, lon) → metres (NaN = no data). */
 export function terrainAt(sample, lat, lon, radiusKm) {
   const n = 2 * HALF + 1;

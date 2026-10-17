@@ -35,7 +35,9 @@ export const PURPOSES = {
   habitat: { label: 'Habitats & long stays', blurb: 'Harsh thermal cycles, thin dry air and strong UV for living and working.',
     w: { ts_mean: 2, ts_range: 2, ts_min: 2, pressure: 2, uv: 1.5, humidity: 1, precip: 1, barren: 1, wind: 1, cave: 1.5 } },
   ice: { label: 'Ice & resource mining', blurb: 'Frozen ground in cold, dry places — for drills and water extraction.',
-    w: { frozen: 3, ts_mean: 2, ts_min: 2, humidity: 1, precip: 1, barren: 1, relief: 1 } },
+    // Ground ice on Mars and the Moon lies under bare regolith, so bare ground weighs as much as the ice
+    // itself: otherwise Earth's ice sheets win, though polar deserts with permafrost are the real match.
+    w: { frozen: 3, ts_mean: 2, ts_min: 2, humidity: 1, precip: 1, barren: 3, relief: 1 } },
   geology: { label: 'Geology & sampling', blurb: 'Basaltic lava and impact craters on bare ground — field-geology training.',
     w: { volcanic: 3, impact: 3, barren: 2, relief: 1, slope: 1, precip: 1, cave: 2 } },
   light: { label: 'Light & power', blurb: 'Low sun and long shadows for solar power, cameras and navigation.',
@@ -113,7 +115,7 @@ export function targetProfile(model, t) {
   return prof;
 }
 
-function earthPos(model, f, i) {
+export function earthPos(model, f, i) {
   return FACTORS[f].degree ? model.col[f][i] : model.pct[f][i];
 }
 
@@ -181,6 +183,65 @@ export function bestCellNear(model, scores, lat, lon, radiusKm = 60) {
     if (best < 0 || scores[i] > scores[best]) best = i;
   }
   return best;
+}
+
+// ---------- robustness ----------
+// Is a place a good analog only because of the exact weights we picked? Re-score everything many
+// times with every weight scaled by a random factor in [0.5, 1.5] and every target position shifted by
+// up to ±0.05 on Earth's scale (the Moon/Mars climate figures are rounded literature values), and count
+// how often each place stays within the top 1 % of Earth's land. Seeded, so results are reproducible.
+function mulberry32(seed) {
+  return () => {
+    seed |= 0; seed = (seed + 0x6d2b79f5) | 0;
+    let x = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x;
+    return ((x ^ (x >>> 14)) >>> 0) / 4294967296;
+  };
+}
+export const STABILITY_RUNS = 60;
+export const STABILITY_TOP = 0.01;
+
+/** Returns an object with step() → true when finished, and result() → Map(cell → share of runs in the top 1 %). */
+export function stabilityRunner(model, prof, weights, cells, runs = STABILITY_RUNS) {
+  const rnd = mulberry32(20261017);
+  const hits = new Map(cells.map((i) => [i, 0]));
+  let done = 0;
+  return {
+    step() {
+      if (done >= runs) return true;
+      const w = {}, p = {};
+      for (const f of FACTOR_KEYS) {
+        if (!prof[f] || !(weights[f] > 0)) continue;
+        w[f] = weights[f] * (0.5 + rnd());
+        p[f] = prof[f].beyond ? prof[f] : { ...prof[f], pos: Math.min(1, Math.max(0, prof[f].pos + (rnd() - 0.5) * 0.1)) };
+      }
+      const s = scoreAll(model, p, w);
+      // Area-weighted share of land that scores higher than each candidate.
+      for (const i of cells) {
+        let above = 0;
+        const si = s[i];
+        for (let k = 0; k < model.n; k++) if (s[k] > si) above += model.w[k];
+        if (above / model.totalW < STABILITY_TOP) hits.set(i, hits.get(i) + 1);
+      }
+      done++;
+      return done >= runs;
+    },
+    progress: () => done / runs,
+    result: () => new Map([...hits].map(([i, h]) => [i, h / Math.max(1, done)])),
+  };
+}
+
+/** Score and rank of one cell for every purpose (for the site dossier). */
+export function allPurposes(model, prof, cell) {
+  const out = {};
+  for (const [id, p] of Object.entries(PURPOSES)) {
+    const w = Object.fromEntries(FACTOR_KEYS.map((f) => [f, p.w[f] || 0]));
+    const s = scoreAll(model, prof, w);
+    let above = 0;
+    for (let k = 0; k < model.n; k++) if (s[k] > s[cell]) above += model.w[k];
+    out[id] = { score: s[cell], top: above / model.totalW };
+  }
+  return out;
 }
 
 /** Factor-by-factor comparison of one Earth cell with the target. */
