@@ -19,7 +19,7 @@
     </div>
     <div class="top-actions">
       <button class="tour-btn" id="tour-btn" data-i18n="tourBtn"></button>
-      <a class="method-link" href="#method" data-i18n="howLink">How it works</a>
+      <button class="method-link" id="method-btn" data-i18n="howLink">How it works</button>
       <div class="lang" role="radiogroup" aria-label="Language / Мова">
         <button role="radio" data-lang="en" aria-checked="true">EN</button>
         <button role="radio" data-lang="uk" aria-checked="false">УКР</button>
@@ -53,18 +53,6 @@
     </aside>
 
     <section class="results">
-      <section class="intro" id="intro" aria-labelledby="intro-h">
-        <div class="intro-head">
-          <h2 id="intro-h" data-i18n="introTitle"></h2>
-          <button class="intro-hide" id="intro-hide" data-i18n="introHide"></button>
-        </div>
-        <ol class="intro-steps">
-          <li data-i18n="intro1"></li>
-          <li data-i18n="intro2"></li>
-          <li data-i18n="intro3"></li>
-        </ol>
-      </section>
-
       <div class="map-wrap">
         <div id="map" data-i18n-aria="mapAria"></div>
         <div class="legend" aria-hidden="true">
@@ -78,28 +66,23 @@
         <div class="map-status" id="map-status" data-i18n="loading">Loading NASA data…</div>
       </div>
 
-      <div class="panels">
-        <section class="panel" aria-labelledby="top-h">
-          <div class="panel-head">
-            <h2 id="top-h" data-i18n="topTitle"></h2>
-            <p class="hint" id="top-hint"></p>
-          </div>
-          <ol class="sites" id="sites"></ol>
+      <section class="panel sites-panel" aria-labelledby="top-h">
+        <div class="panel-head row">
+          <h2 id="top-h" data-i18n="topTitle"></h2>
+          <span class="hint" id="top-hint"></span>
           <div class="export">
             <span data-i18n="exportLabel"></span>
             <button id="export-csv">CSV</button>
             <button id="export-geojson">GeoJSON</button>
           </div>
-        </section>
+        </div>
+        <ol class="sites" id="sites"></ol>
+      </section>
 
-        <section class="panel compare" aria-labelledby="cmp-h" id="compare">
-          <div class="panel-head">
-            <h2 id="cmp-h" data-i18n="cmpTitle"></h2>
-            <p class="hint" data-i18n="cmpHint"></p>
-          </div>
-          <div id="compare-body"></div>
-        </section>
-      </div>
+      <section class="panel compare" aria-labelledby="cmp-h" id="compare">
+        <h2 id="cmp-h" class="sr-only" data-i18n="cmpTitle"></h2>
+        <div id="compare-body"></div>
+      </section>
 
       <section class="panel check" aria-labelledby="check-h">
         <div class="panel-head">
@@ -109,20 +92,34 @@
         <div id="check"></div>
       </section>
 
-      <section class="panel method" id="method" aria-labelledby="method-h">
-        <h2 id="method-h" data-i18n="methodTitle"></h2>
-        <div class="method-grid">
-          <div><h3 data-i18n="m1h"></h3><p data-i18n="m1p"></p></div>
-          <div><h3 data-i18n="m2h"></h3><p data-i18n="m2p"></p></div>
-          <div><h3 data-i18n="m3h"></h3><p data-i18n="m3p"></p></div>
-          <div><h3 data-i18n="m4h"></h3><p data-i18n="m4p"></p></div>
-        </div>
-        <h3 data-i18n="dataTitle"></h3>
-        <ul class="sources" id="sources"></ul>
-        <p class="disclaimer" data-i18n="disclaimer"></p>
-      </section>
     </section>
   </main>
+
+  <dialog class="modal" id="method" aria-labelledby="method-h">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2 id="method-h" data-i18n="methodTitle"></h2>
+        <button class="modal-close" id="method-close" data-i18n-aria="close" aria-label="Close">×</button>
+      </div>
+      <h3 data-i18n="introTitle"></h3>
+      <ol class="intro-steps">
+        <li data-i18n="intro1"></li>
+        <li data-i18n="intro2"></li>
+        <li data-i18n="intro3"></li>
+      </ol>
+      <div class="method-grid">
+        <div><h3 data-i18n="m1h"></h3><p data-i18n="m1p"></p></div>
+        <div><h3 data-i18n="m2h"></h3><p data-i18n="m2p"></p></div>
+        <div><h3 data-i18n="m3h"></h3><p data-i18n="m3p"></p></div>
+        <div><h3 data-i18n="m4h"></h3><p data-i18n="m4p"></p></div>
+        <div><h3 data-i18n="m5h"></h3><p data-i18n="m5p"></p></div>
+        <div><h3 data-i18n="m6h"></h3><p data-i18n="m6p"></p></div>
+      </div>
+      <h3 data-i18n="dataTitle"></h3>
+      <ul class="sources" id="sources"></ul>
+      <p class="disclaimer" data-i18n="disclaimer"></p>
+    </div>
+  </dialog>
 
   <section id="dossier" class="dossier" aria-hidden="true"></section>
 

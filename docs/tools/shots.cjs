@@ -49,7 +49,6 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // 1. Whole first screen.
   await page.screenshot({ path: path.join(OUT, '01-overview.jpg'), type: 'jpeg', quality: 86 });
   console.log('shot 01-overview');
-  await shot('02-intro', '#intro');
   await shot('03-site-map-moon', '#site-map');
   await shot('04-purposes', '.controls section:nth-of-type(3)');
   await page.evaluate(() => { document.querySelector('.weights').open = true; });
@@ -59,7 +58,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await waitImgs();
   await waitStab();
   results.shackleton_balanced = await facts();
-  await shot('07-sites-shackleton', '.panels .panel:first-child');
+  await shot('07-sites-shackleton', '.sites-panel');
   await shot('08-compare-shackleton', '#compare');
   await shot('09-check-shackleton', '.check');
 
@@ -68,7 +67,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await shot('10-site-map-mars', '#site-map');
   await shot('11-earth-map-jezero', '.map-wrap');
   results.jezero_balanced = await facts();
-  await shot('12-sites-jezero', '.panels .panel:first-child');
+  await shot('12-sites-jezero', '.sites-panel');
   await shot('13-compare-jezero', '#compare');
   await shot('14-check-jezero', '.check');
 
@@ -77,7 +76,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await page.evaluate(() => { const c = document.querySelector('#show-caves'); if (!c.checked) c.click(); });
   await shot('15-earth-map-arsia-geology', '.map-wrap');
   results.arsia_geology = await facts();
-  await shot('16-sites-arsia-geology', '.panels .panel:first-child');
+  await shot('16-sites-arsia-geology', '.sites-panel');
   await shot('17-compare-arsia-geology', '#compare');
   await shot('18-check-arsia-geology', '.check');
   await shot('24-radar-detail-arsia', '.cmp-grid');
@@ -102,6 +101,12 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await shot('19-earth-map-arcadia-ice', '.map-wrap');
   results.arcadia_ice = await facts();
 
+  // 4b. Mars: Gale crater, geology (impact craters in sedimentary rock).
+  await pick('mars', 'gale', 4);
+  results.gale_geology = await facts();
+  await shot('27-sites-gale-geology', '.sites-panel');
+  await shot('28-radar-detail-gale', '.cmp-grid');
+
   // 5. Moon: Shackleton, habitats — the weak case.
   await pick('moon', 'shackleton', 2);
   results.shackleton_habitat = await facts();
@@ -110,7 +115,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   // 6. Moon: Hadley, rovers.
   await pick('moon', 'hadley', 1);
   results.hadley_rover = await facts();
-  await shot('21-sites-hadley-rover', '.panels .panel:first-child');
+  await shot('21-sites-hadley-rover', '.sites-panel');
 
   // 6b. Discoveries tour, step 2.
   await page.click('#tour-btn');
@@ -125,7 +130,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await sleep(300);
   const header = await page.$('.top');
   await header.screenshot({ path: path.join(OUT, '22-header.jpg'), type: 'jpeg', quality: 86 });
-  await shot('23-method', '#method');
+  await page.click('#method-btn'); await sleep(500);
+  await shot('23-method', '.modal-box');
+  await page.evaluate(() => document.querySelector('#method').close());
 
   fs.writeFileSync(path.join(__dirname, '..', 'img', 'results.json'), JSON.stringify(results, null, 1));
   await browser.close();

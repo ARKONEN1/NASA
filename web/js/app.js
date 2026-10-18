@@ -26,17 +26,22 @@ const fmtLon = (v) => `${Math.abs(v).toFixed(1).replace('.', getLang() === 'uk' 
 const fmtCoords = (la, lo) => `${fmtLat(la)} ${fmtLon(lo)}`;
 const num = (v, d) => (getLang() === 'uk' ? v.toFixed(d).replace('.', ',').replace('-', '−') : v.toFixed(d).replace('-', '−'));
 const pct = (x) => `${Math.round(x * 100)}%`;
-function topShare(rank) {
-  const top = (1 - rank) * 100;
-  const x = top < 1 ? (top < 0.1 ? '0.1' : top.toFixed(1)) : String(Math.round(top));
-  return t('top', { x: getLang() === 'uk' ? x.replace('.', ',') : x });
+function beatPct(rank) {
+  const b = Math.min(99.9, Math.max(0, rank * 100));
+  const x = b >= 99 ? (Math.floor(b * 10) / 10).toFixed(1) : String(Math.floor(b));
+  return getLang() === 'uk' ? x.replace('.', ',') : x;
 }
+const topShare = (rank) => t('top', { x: beatPct(rank) });
 function fmtValue(f, v) {
   const d = FACTORS[f];
   if (v == null || !Number.isFinite(v)) return '—';
   if (d.degree) return pct(v);
   const u = S().units[d.unit] ?? d.unit;
   return `${num(v, d.digits)}${u ? (u === '°' || u === '°C' ? '' : ' ') + u : ''}`;
+}
+function meter(sim) {
+  const v = Number.isFinite(sim) ? sim : 0, [cr, cg, cb] = ramp(0.25 + v * 0.75);
+  return `<div class="meter"><div class="bar"><i style="width:${Math.max(3, v * 100)}%;background:rgb(${cr},${cg},${cb})"></i></div><b>${Number.isFinite(sim) ? Math.round(sim * 100) + '%' : '—'}</b></div>`;
 }
 function countryOf(i) {
   const c = meta.countries[model.col.country[i]];
@@ -55,12 +60,16 @@ function ramp(x0) {
 // ---------- map ----------
 const map = L_map();
 function L_map() {
-  const m = L.map('map', { crs: L.CRS.Simple, minZoom: 1, maxZoom: 7, zoomSnap: 0.25, attributionControl: false });
+  const m = L.map('map', { crs: L.CRS.Simple, minZoom: 0, maxZoom: 7, zoomSnap: 0, zoomDelta: 0.5, attributionControl: false });
   // The west half overlaps the east by a hair so no seam shows at 0°.
   L.imageOverlay('data/basemap-west.jpg', [[-90, -180], [90, 0.06]]).addTo(m);
   L.imageOverlay('data/basemap-east.jpg', [[-90, 0], [90, 180]]).addTo(m);
   m.setMaxBounds([[-120, -240], [120, 240]]);
-  m.fitBounds([[-60, -170], [80, 170]]);
+  const fit = () => m.fitBounds([[-58, -180], [84, 180]], { animate: false });
+  fit();
+  // Refit when the frame changes size (window resize, sidebar collapsing on phones).
+  let w0 = m.getSize().x;
+  new ResizeObserver(() => { m.invalidateSize(); const w = m.getSize().x; if (Math.abs(w - w0) > 40 && tourStep < 0) fit(); w0 = w; }).observe(document.getElementById('map'));
   return m;
 }
 let scoreLayer = null, selRect = null;
@@ -270,11 +279,12 @@ function renderSites() {
     li.className = 'site';
     li.tabIndex = 0;
     li.setAttribute('aria-selected', String(i === state.selected));
+    li.title = fmtCoords(model.col.lat[i], model.col.lon[i]);
     const kn = knownNear(i);
-    li.innerHTML = `<span class="n">${k + 1}</span>
-      <div><div class="where">${esc(countryOf(i))}${kn ? `<span class="tag known" title="${esc(t('knownNear', { name: tx(kn, 'name') }))}">${t('tagKnown')}</span>` : `<span class="tag new">${t('tagNew')}</span>`}</div>
-      <div class="why">${fmtCoords(model.col.lat[i], model.col.lon[i])} · ${esc(whyLine(i))}</div></div>
-      <div class="score">${Math.round(scores[i] * 100)}<small>${topShare(ranks[i])}</small><small class="stab${(stab.get(i) ?? 1) < 0.8 ? ' weak' : ''}" title="${esc(t('stabilityHint'))}">${stabText(i)}</small></div>`;
+    li.innerHTML = `<div class="site-top"><span class="n">${k + 1}</span><span class="where">${esc(countryOf(i))}</span><span class="score" title="${esc(t('scoreHint'))}">${Math.round(scores[i] * 100)}<small>${t('scoreWord')}</small></span></div>
+      <div class="site-meta">${kn ? `<span class="tag known" title="${esc(t('knownNear', { name: tx(kn, 'name') }))}">${t('tagKnown')}</span>` : `<span class="tag new">${t('tagNew')}</span>`}
+        <span>${topShare(ranks[i])}</span><span class="stab${(stab.get(i) ?? 1) < 0.8 ? ' weak' : ''}" title="${esc(t('stabilityHint'))}">${stabText(i)}</span></div>
+      <div class="why">${esc(whyLine(i))}</div>`;
     li.onclick = () => select(i);
     li.onkeydown = (e) => { if (e.key === 'Enter') select(i); };
     ol.append(li);
@@ -326,49 +336,43 @@ function renderCompare() {
   const kn = knownNear(i);
   const tName = tx(tg, 'name');
   let html = `
-    <div class="cmp-head">
-      <div class="cmp-side">
+    <div class="cmp-media">
+      <div class="cmp-side" style="grid-area:th">
         <span class="label">${t(state.body)} · ${esc(tx(tg, 'kind'))}</span>
         <span class="title">${esc(tName)}</span>
         <span class="coords">${fmtCoords(tg.lat, tg.lon)}</span>
-        <div class="cmp-imgs">
-          <div class="cmp-img"><img src="data/thumbs/${tg.id}.png" alt=""><span>${t('relief')} · ${targets.thumbKm} ${t('km')}</span></div>
-          <p class="cmp-why">${esc(tx(tg, 'why'))}</p>
-        </div>
       </div>
-      <div class="cmp-side">
+      <div class="cmp-side" style="grid-area:eh">
         <span class="label">${t('earth')}${kn ? ` · ${esc(t('near', { name: tx(kn, 'name') }))}` : ''}</span>
         <span class="title">${esc(countryOf(i))}</span>
         <span class="coords">${fmtCoords(la, lo)}</span>
-        <p class="site-facts">${siteFacts(i)}</p>
-        ${nearbyHtml(la, lo)}
-        ${logisticsHtml(la, lo)}
-        <div class="cmp-imgs">
-          <div class="cmp-img"><img loading="lazy" src="${gibs('ASTER_GDEM_Greyscale_Shaded_Relief', la, lo)}" alt=""><span>${t('relief')} · 150 ${t('km')}</span></div>
-          <div class="cmp-img"><img loading="lazy" src="${gibs('BlueMarble_NextGeneration', la, lo)}" alt=""><span>${t('blueMarble')}</span></div>
-        </div>
       </div>
+      <div class="cmp-img" style="grid-area:ti"><img src="data/thumbs/${tg.id}.png" alt=""><span>${t('relief')} · ${targets.thumbKm} ${t('km')}</span></div>
+      <div class="cmp-img" style="grid-area:er"><img loading="lazy" src="${gibs('ASTER_GDEM_Greyscale_Shaded_Relief', la, lo)}" alt=""><span>${t('relief')} · 150 ${t('km')}</span></div>
+      <div class="cmp-img" style="grid-area:es"><img loading="lazy" src="${gibs('BlueMarble_NextGeneration', la, lo)}" alt=""><span>${t('blueMarble')}</span></div>
+      <div class="cmp-text" style="grid-area:tw">${esc(tx(tg, 'why'))}</div>
+      <div class="cmp-text" style="grid-area:ef"><p class="site-facts">${siteFacts(i)}</p>${nearbyHtml(la, lo)}${logisticsHtml(la, lo)}</div>
     </div>
-    <div class="cmp-score"><strong>${Math.round(scores[i] * 100)}</strong><span>${esc(t('scoreLine', { share: topShare(ranks[i]), purpose: lowerFirst(pName(state.purpose)) }))}</span>
+    <div class="cmp-score"><span class="score-word">${t('scoreWord')}</span><strong>${Math.round(scores[i] * 100)}</strong><span>${esc(t('scoreLine', { share: topShare(ranks[i]), purpose: lowerFirst(pName(state.purpose)) }))}</span>
       <span class="stab-line" title="${esc(t('stabilityHint'))}">${stabText(i)}</span>
       <button class="dossier-btn" id="dossier-btn">${t('dossierBtn')}</button></div>
     <div class="cmp-grid">
-      <div class="radar-box"><h3>${t('radarTitle')}</h3>${radarSvg(model, prof, state.weights, i, { label: fShort, earthLabel: t('earth'), targetLabel: tName })}<p class="hint">${t('radarHint')}</p></div>
-      <div class="detail-box"><h3>${t('detailTitle')}</h3>${detailHtml(i, tg)}</div>
-    </div>
-    <table class="factors"><thead><tr><th>${t('colFactor')}</th><th class="num">${t('colEarth')}</th><th class="num">${esc(t(state.body))}</th><th>${t('colMatch')}</th></tr></thead><tbody>`;
+      <div class="cmp-col">
+        <div class="radar-box"><h3>${t('radarTitle')} <span class="info" title="${esc(t('radarHint'))}">?</span></h3>${radarSvg(model, prof, state.weights, i, { label: fShort, earthLabel: t('earth'), targetLabel: tName })}</div>
+        <div class="detail-box"><h3>${t('detailTitle')} <span class="info" title="${esc(t('detailHint'))}">?</span></h3>${detailHtml(i, tg)}</div>
+      </div>
+      <div class="cmp-col">
+    <table class="factors"><thead><tr><th>${t('colFactor')}</th><th class="num">${t('colEarth')}</th><th class="num">${esc(t(state.body))}</th><th class="match">${t('colMatch')}</th></tr></thead><tbody>`;
   let group = '';
   for (const r of explain(model, i, prof, state.weights)) {
     const d = FACTORS[r.f];
     if (d.group !== group) { group = d.group; html += `<tr class="group-row"><td colspan="4">${S().groups[group]}</td></tr>`; }
-    const sim = Number.isFinite(r.sim) ? r.sim : 0;
-    const [cr, cg, cb] = ramp(0.25 + sim * 0.75);
-    const beyond = r.beyond ? `<span class="beyond">${t(r.beyond === 'below' ? 'lower' : 'higher')}</span>` : '';
+    const beyond = r.beyond ? `<span class="beyond" title="${esc(t(r.beyond === 'below' ? 'lower' : 'higher'))}">${r.beyond === 'below' ? '↓' : '↑'}</span>` : '';
     html += `<tr class="${r.weight > 0 ? '' : 'off'}" title="${esc(fName(r.f))}${r.weight > 0 ? '' : ` (${t('notCounted')})`}">
       <td>${esc(fShort(r.f))}</td><td class="num">${fmtValue(r.f, r.earth)}</td><td class="num">${fmtValue(r.f, r.target)}${beyond}</td>
-      <td><div class="bar"><i style="width:${Math.max(3, sim * 100)}%;background:rgb(${cr},${cg},${cb})"></i></div></td></tr>`;
+      <td class="match">${meter(r.sim)}</td></tr>`;
   }
-  body.innerHTML = html + '</tbody></table>';
+  body.innerHTML = html + '</tbody></table></div></div>';
   $('#dossier-btn').onclick = () => openDossier(i);
 }
 
@@ -378,10 +382,8 @@ function detailHtml(i, tg) {
   if (!e) return `<p class="hint">${t('detailNone')}</p>`;
   const rows = detailRows(e, tg.detail);
   const fmt = (k, v) => (!Number.isFinite(v) ? '—' : k === 'relief' ? `${num(v, 0)} ${t('m')}` : k.startsWith('pct') ? `${num(v, v < 10 ? 1 : 0)}%` : `${num(v, 1)}°`);
-  return `<table class="factors compact"><thead><tr><th></th><th class="num">${t('colEarth')}</th><th class="num">${esc(t(state.body))}</th><th>${t('colMatch')}</th></tr></thead><tbody>${rows.map((r) => {
-    const sim = Number.isFinite(r.sim) ? r.sim : 0, [cr, cg, cb] = ramp(0.25 + sim * 0.75);
-    return `<tr><td>${t('d_' + r.k)}</td><td class="num">${fmt(r.k, r.earth)}</td><td class="num">${fmt(r.k, r.target)}</td><td><div class="bar"><i style="width:${Math.max(3, sim * 100)}%;background:rgb(${cr},${cg},${cb})"></i></div></td></tr>`;
-  }).join('')}</tbody></table><p class="hint">${t('detailHint')}</p>`;
+  return `<table class="factors compact"><thead><tr><th></th><th class="num">${t('colEarth')}</th><th class="num">${esc(t(state.body))}</th><th class="match">${t('colMatch')}</th></tr></thead><tbody>${rows.map((r) =>
+    `<tr><td>${t('d_' + r.k)}</td><td class="num">${fmt(r.k, r.earth)}</td><td class="num">${fmt(r.k, r.target)}</td><td class="match">${meter(r.sim)}</td></tr>`).join('')}</tbody></table>`;
 }
 function logisticsHtml(la, lo) {
   const { town, airport } = logistics(logi, la, lo);
@@ -406,8 +408,7 @@ function liftHtml(res) {
   const chips = (a, cls) => a.map((x) => `<span class="${cls}">${esc(fShort(x.f))}</span>`).join('') || '—';
   return `<div class="lift">
     <div><h3>${t('liftUp')}</h3><div class="chips">${chips(up, 'up')}</div></div>
-    <div><h3>${t('liftFlat')}</h3><div class="chips">${chips(flat, '')}</div></div>
-    ${flat.length ? `<p>${t('liftNote')}</p>` : ''}
+    <div><h3>${t('liftFlat')} <span class="info" title="${esc(t('liftNote'))}">?</span></h3><div class="chips">${chips(flat, '')}</div></div>
   </div>`;
 }
 
@@ -425,12 +426,12 @@ function renderCheck() {
   $('#check').innerHTML = `
     <div class="check-summary">
       <div><strong>${num(auc, 2)}</strong> <span>${t('checkAuc')}</span></div>
-      <div><strong>${topShare(median)}</strong> <span>${t('checkMedian', { n: res.length, body: t(`adj_${state.body}`), rnd: topShare(rndMedian) })}</span></div>
+      <div><strong>${beatPct(median)}%</strong> <span>${t('checkMedian', { n: res.length, rnd: beatPct(rndMedian) + '%' })}</span></div>
       <div><strong>${inTop10}/${res.length}</strong> <span>${t('checkTop10')}</span></div>
     </div>
     <ul class="check-list">${res.map((x) => {
       const [cr, cg, cb] = ramp(x.r);
-      return `<li data-i="${x.i}" title="${esc(tx(x.s, 'use'))}"><span class="nm">${esc(tx(x.s, 'name'))}</span><div class="bar"><i style="width:${x.r * 100}%;background:rgb(${cr},${cg},${cb})"></i></div><span class="pc">${topShare(x.r).replace(/^\D+/, '')}</span></li>`;
+      return `<li data-i="${x.i}" title="${esc(tx(x.s, 'use'))}"><span class="nm">${esc(tx(x.s, 'name'))}</span><div class="bar"><i style="width:${x.r * 100}%;background:rgb(${cr},${cg},${cb})"></i></div><span class="pc">${beatPct(x.r)}%</span></li>`;
     }).join('')}</ul>
     ${liftHtml(res)}`;
   document.querySelectorAll('.check-list li').forEach((li) => (li.onclick = () => select(+li.dataset.i)));
@@ -446,7 +447,8 @@ function select(i, { pan = true } = {}) {
   const la = model.col.lat[i], lo = model.col.lon[i], { dLat, dLon } = meta.grid;
   if (selRect) selRect.remove();
   selRect = L.rectangle([[la - dLat / 2, lo - dLon / 2], [la + dLat / 2, lo + dLon / 2]], { color: '#fff', weight: 2, fill: false, interactive: false }).addTo(map);
-  if (pan) map.panTo([la, lo]);
+  // Pan only when the place is out of view, so the whole-world view stays filled edge to edge.
+  if (pan && !map.getBounds().pad(-0.08).contains([la, lo])) map.panTo([la, lo]);
   drawPins(); renderSites(); renderCompare();
   writeHash();
   if (stabAsked.size) runStability([i]);
@@ -601,7 +603,7 @@ async function openDossier(i) {
     <section class="ds-cols">
       <div><h2>${t('radarTitle')}</h2>${radarSvg(model, prof, state.weights, i, { label: fShort, earthLabel: t('earth'), targetLabel: tx(tg, 'name') })}</div>
       <div><h2>${t('dossierPurposes')}</h2><table class="ds-table"><thead><tr><th>${t('stepPurpose')}</th><th class="num">/100</th><th class="num">${t('dossierShare')}</th></tr></thead><tbody>${purposeRows}</tbody></table>
-        <h2>${t('detailTitle')}</h2>${detailHtml(i, tg)}</div>
+        <h2>${t('detailTitle')}</h2>${detailHtml(i, tg)}<p class="hint">${t('detailHint')}</p></div>
     </section>
     <section><h2>${t('dossierFactors')}</h2><table class="ds-table"><thead><tr><th>${t('colFactor')}</th><th class="num">${t('colEarth')}</th><th class="num">${esc(t(state.body))}</th><th class="num">${t('colMatch')}</th></tr></thead><tbody>${factorRows}</tbody></table></section>
     <footer class="ds-foot">${t('dossierFoot')} · ${esc(location.href)}</footer>`;
@@ -647,10 +649,11 @@ window.addEventListener('hashchange', () => {
   recompute();
 });
 
-// ---------- intro (can be hidden; remembered per browser) ----------
-try { if (localStorage.getItem('introHidden') === '1') $('#intro').hidden = true; } catch {}
-$('#intro-hide').onclick = () => { $('#intro').hidden = true; try { localStorage.setItem('introHidden', '1'); } catch {} };
-$('.method-link').addEventListener('click', () => { $('#intro').hidden = false; });
+// ---------- "How it works" modal: closes on ×, Esc or a click outside the window ----------
+const methodDlg = $('#method');
+$('#method-btn').onclick = () => methodDlg.showModal();
+$('#method-close').onclick = () => methodDlg.close();
+methodDlg.addEventListener('click', (e) => { if (e.target === methodDlg) methodDlg.close(); });
 
 // ---------- boot ----------
 applyStatic(); renderLang();

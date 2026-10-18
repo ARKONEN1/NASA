@@ -25,7 +25,7 @@ export function radarSvg(model, prof, weights, i, { label, earthLabel, targetLab
     const anchor = Math.abs(Math.cos(a)) < 0.2 ? 'middle' : Math.cos(a) > 0 ? 'start' : 'end';
     return `<text x="${x.toFixed(1)}" y="${(y + 3.5).toFixed(1)}" text-anchor="${anchor}" class="rd-label${weights[f] > 0 ? '' : ' off'}">${esc(label(f))}</text>`;
   }).join('');
-  return `<svg viewBox="-46 0 ${size + 92} ${size}" class="radar" role="img" aria-label="${esc(earthLabel)} / ${esc(targetLabel)}">
+  return `<svg viewBox="-84 0 ${size + 168} ${size}" class="radar" role="img" aria-label="${esc(earthLabel)} / ${esc(targetLabel)}">
     ${rings}${spokes}
     <polygon points="${poly(earth)}" class="rd-earth"/>
     <polygon points="${poly(tgt)}" class="rd-target"/>
