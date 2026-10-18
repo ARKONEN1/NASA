@@ -1,5 +1,5 @@
 {
-  "_note": "Terrain (relief, slope, elevation) for each target is measured by tools/build-targets.mjs from LRO LOLA (Moon) and MGS MOLA (Mars). Climate values are rounded literature figures: Moon — LRO Diviner (Williams et al. 2017, Icarus 283; Paige et al. 2010, Science 330); Mars — Curiosity REMS, Perseverance MEDA, Phoenix MET, InSight APSS and the Mars Climate Database v6. ts_* are ground (surface) temperatures in °C: annual mean, mean daily maximum, mean daily minimum. pressure in kPa, humidity in g/kg, precip in mm/day, uv as an index (both bodies exceed any Earth value), wind in m/s. ice/volcanic/impact are 0–1 degrees of how strongly the site is defined by ground ice, basaltic volcanism and impact cratering. cave (only for cave and lava-channel sites) is how strongly the site is defined by lava tubes; other sites leave it out.",
+  "_note": "Terrain (relief, slope, elevation) for each target is measured by tools/build-targets.mjs from LRO LOLA (Moon) and MGS MOLA (Mars). Climate values are rounded literature figures: Moon — LRO Diviner (Williams et al. 2017, Icarus 283; Paige et al. 2010, Science 330); Mars — Curiosity REMS, Perseverance MEDA, Phoenix MET, InSight APSS and the Mars Climate Database v6. ts_* are ground (surface) temperatures in °C: annual mean, mean daily maximum, mean daily minimum. pressure in kPa, humidity in g/kg, precip in mm/day, uv as an index (both bodies exceed any Earth value), wind in m/s. ice/volcanic/impact are 0–1 degrees of how strongly the site is defined by ground ice, basaltic volcanism and impact cratering. cave (only for cave and lava-channel sites) is how strongly the site is defined by lava tubes; other sites leave it out. plutonic (crystalline highland-type rock, e.g. lunar anorthosite) and sediment (sedimentary rocks and evaporites, e.g. lake deposits and sulfates on Mars) are 0–1 degrees from the site geology; on Earth they come from the GLiM lithological map.",
   "moon": [
     {
       "id": "shackleton",
@@ -27,7 +27,9 @@
         "mission": "Район-кандидат Artemis біля південного полюса",
         "kind": "Полярна база",
         "why": "Майже безперервне сонячне світло на валу, а за кілька кілометрів — вічно затінені холодні пастки з водяним льодом."
-      }
+      },
+      "plutonic": 1,
+      "sediment": 0
     },
     {
       "id": "malapert",
@@ -55,7 +57,9 @@
         "mission": "Район-кандидат Artemis III",
         "kind": "Полярна база",
         "why": "Масив заввишки 5 км із довгими сонячними періодами та прямою видимістю Землі для зв’язку."
-      }
+      },
+      "plutonic": 1,
+      "sediment": 0
     },
     {
       "id": "mons-mouton",
@@ -83,7 +87,9 @@
         "mission": "Район-кандидат Artemis III; район досліджень VIPER",
         "kind": "Полярна база",
         "why": "Широка, відносно рівна вершина з добрим освітленням поруч із холодними пастками, де є лід."
-      }
+      },
+      "plutonic": 1,
+      "sediment": 0
     },
     {
       "id": "apollo11",
@@ -111,7 +117,9 @@
         "mission": "Місце посадки Apollo 11",
         "kind": "Морська рівнина",
         "why": "Рівне базальтове море — еталон екваторіальної посадки на давніх лавових рівнинах."
-      }
+      },
+      "plutonic": 0,
+      "sediment": 0
     },
     {
       "id": "hadley",
@@ -140,7 +148,9 @@
         "kind": "Лавовий канал",
         "why": "Звивистий лавовий канал біля підніжжя місячних Апеннін — вулканічна й ударна геологія поруч."
       },
-      "cave": 0.5
+      "cave": 0.5,
+      "plutonic": 0.3,
+      "sediment": 0
     },
     {
       "id": "marius-pit",
@@ -169,7 +179,9 @@
         "kind": "Печера / лавова трубка",
         "why": "Природний вхід у лавову трубку, яка могла б захистити базу від радіації, мікрометеоритів і перепадів температур."
       },
-      "cave": 1
+      "cave": 1,
+      "plutonic": 0,
+      "sediment": 0
     }
   ],
   "mars": [
@@ -199,7 +211,9 @@
         "mission": "Місце посадки Perseverance",
         "kind": "Кратерне озеро з дельтою",
         "why": "Давнє кратерне озеро з дельтою річки — місце пошуку слідів минулого життя."
-      }
+      },
+      "plutonic": 0,
+      "sediment": 0.7
     },
     {
       "id": "gale",
@@ -227,7 +241,9 @@
         "mission": "Місце посадки Curiosity",
         "kind": "Кратер із шаруватою горою",
         "why": "Озерні відклади, складені в 5-кілометрову гору (гора Шарпа) всередині 154-кілометрового кратера."
-      }
+      },
+      "plutonic": 0,
+      "sediment": 1
     },
     {
       "id": "meridiani",
@@ -255,7 +271,9 @@
         "mission": "Місце посадки Opportunity",
         "kind": "Осадова рівнина",
         "why": "Рівнини із сульфатного пісковику та гематитових кульок, що утворилися в кислих ґрунтових водах."
-      }
+      },
+      "plutonic": 0,
+      "sediment": 1
     },
     {
       "id": "utopia",
@@ -283,7 +301,9 @@
         "mission": "Місце посадки Zhurong (Tianwen-1)",
         "kind": "Низинна рівнина",
         "why": "Величезні низинні рівнини з похованим льодом і, можливо, берегами давнього океану."
-      }
+      },
+      "plutonic": 0,
+      "sediment": 0.5
     },
     {
       "id": "arcadia",
@@ -311,7 +331,9 @@
         "mission": "Район для висадки людей (картування льоду SWIM)",
         "kind": "Рівнина, багата на лід",
         "why": "Водяний лід за метр-два під поверхнею на широтах, ще досить теплих для екіпажів."
-      }
+      },
+      "plutonic": 0,
+      "sediment": 0.3
     },
     {
       "id": "deuteronilus",
@@ -339,7 +361,9 @@
         "mission": "Кандидат на зону досліджень людьми",
         "kind": "Поховані льодовики",
         "why": "Столові гори, оповиті вкритими уламками льодовиками, — вода для бази й літопис клімату."
-      }
+      },
+      "plutonic": 0,
+      "sediment": 0.3
     },
     {
       "id": "phoenix",
@@ -367,7 +391,9 @@
         "mission": "Місце посадки Phoenix",
         "kind": "Полярний льодовий рельєф",
         "why": "Полігональний ґрунт над зцементованим льодом за кілька сантиметрів углиб; перхлоратні солі."
-      }
+      },
+      "plutonic": 0,
+      "sediment": 0.3
     },
     {
       "id": "arsia",
@@ -396,7 +422,9 @@
         "kind": "Печера / лавова трубка",
         "why": "Провали на схилах гігантського щитового вулкана ведуть у лавові трубки — природні укриття."
       },
-      "cave": 1
+      "cave": 1,
+      "plutonic": 0,
+      "sediment": 0
     },
     {
       "id": "insight",
@@ -424,7 +452,9 @@
         "mission": "Місце посадки InSight",
         "kind": "Вулканічна рівнина",
         "why": "Рівні вулканічні рівнини, обрані як найбезпечніший майданчик для посадки."
-      }
+      },
+      "plutonic": 0,
+      "sediment": 0.2
     }
   ]
 }

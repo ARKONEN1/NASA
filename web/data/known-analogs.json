@@ -1,5 +1,5 @@
 {
-  "_note": "Established terrestrial analog sites used by NASA/ESA field campaigns. Used only to test the method: a good similarity score should rank them high without being told about them. Coordinates are rounded to ~0.1°.",
+  "_note": "Established terrestrial analog sites used by NASA, ESA and partner field campaigns. Used only to test the method: a good similarity score should rank them high without being told about them. set = \"core\" for the original 19 sites, \"extended\" for the 12 added later; the method check reports both. Coordinates are rounded to ~0.1°.",
   "sites": [
     {
       "name": "Atacama Desert (Yungay)",
@@ -12,7 +12,8 @@
       "uk": {
         "name": "Пустеля Атакама (Юнгай)",
         "use": "Гіпераридні ґрунти, тести роверів для пошуку життя"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "McMurdo Dry Valleys",
@@ -26,7 +27,8 @@
       "uk": {
         "name": "Сухі долини Мак-Мердо",
         "use": "Холодна суха полярна пустеля; вічна мерзлота"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Haughton crater, Devon Island",
@@ -40,7 +42,8 @@
       "uk": {
         "name": "Кратер Хоутон, острів Девон",
         "use": "Проєкт Haughton-Mars: арктичний імпактний кратер"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Mars Desert Research Station, Utah",
@@ -53,7 +56,8 @@
       "uk": {
         "name": "Марсіанська пустельна станція, Юта",
         "use": "Імітації житла в червоній осадовій пустелі"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Death Valley",
@@ -66,7 +70,8 @@
       "uk": {
         "name": "Долина Смерті",
         "use": "Плаї, алювіальні конуси, тести роверів"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Rio Tinto",
@@ -79,7 +84,8 @@
       "uk": {
         "name": "Ріо-Тінто",
         "use": "Кислі залізисто-сульфатні води, тести буріння"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Qaidam Basin",
@@ -92,7 +98,8 @@
       "uk": {
         "name": "Цайдамська западина",
         "use": "Висока холодна солона пустеля з ярдангами"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Pilbara",
@@ -105,7 +112,8 @@
       "uk": {
         "name": "Пілбара",
         "use": "Давні строматоліти; навчання пошуку біосигнатур"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Dallol / Danakil Depression",
@@ -118,7 +126,8 @@
       "uk": {
         "name": "Даллол / западина Данакіль",
         "use": "Екстремальні кислі гідротермальні розсоли"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Svalbard (AMASE)",
@@ -131,7 +140,8 @@
       "uk": {
         "name": "Шпіцберген (AMASE)",
         "use": "Арктичні вулканічні джерела й лід"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Mauna Kea, Hawaii (PISCES)",
@@ -145,7 +155,8 @@
       "uk": {
         "name": "Мауна-Кеа, Гаваї (PISCES)",
         "use": "Базальтовий реголіт, тести ISRU та роверів"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Black Point Lava Flow, Arizona (Desert RATS)",
@@ -158,7 +169,8 @@
       "uk": {
         "name": "Лавовий потік Блек-Пойнт, Аризона (Desert RATS)",
         "use": "Відпрацювання виходів на поверхню та маршрутів роверів"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Meteor Crater, Arizona",
@@ -171,7 +183,8 @@
       "uk": {
         "name": "Метеоритний кратер, Аризона",
         "use": "Геологічна підготовка астронавтів Apollo"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Craters of the Moon, Idaho",
@@ -185,7 +198,8 @@
       "uk": {
         "name": "Кратери Місяця, Айдахо",
         "use": "Базальтові потоки, лавові трубки, підготовка Apollo"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Sudbury, Ontario",
@@ -198,7 +212,8 @@
       "uk": {
         "name": "Садбері, Онтаріо",
         "use": "Підготовка Apollo 16/17 з ударної геології"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Ries crater, Germany",
@@ -211,7 +226,8 @@
       "uk": {
         "name": "Кратер Ріс, Німеччина",
         "use": "Підготовка Apollo 14; геологія Artemis"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Lanzarote (ESA PANGAEA)",
@@ -225,7 +241,8 @@
       "uk": {
         "name": "Лансароте (ESA PANGAEA)",
         "use": "Лавові трубки й базальтові поля"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Iceland highlands (Askja)",
@@ -239,7 +256,8 @@
       "uk": {
         "name": "Високогір’я Ісландії (Аск’я)",
         "use": "Підготовка Apollo; вулканічний пісок і лава"
-      }
+      },
+      "set": "core"
     },
     {
       "name": "Mistastin Lake, Labrador",
@@ -252,7 +270,179 @@
       "uk": {
         "name": "Озеро Містастін, Лабрадор",
         "use": "Удар в анортозит — породу місячних материків"
-      }
+      },
+      "set": "core"
+    },
+    {
+      "name": "Lake Salda, Turkey",
+      "lat": 37.55,
+      "lon": 29.68,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Carbonate shoreline studied as an analog of Jezero crater",
+      "uk": {
+        "name": "Озеро Салда, Туреччина",
+        "use": "Карбонатні береги, що вивчаються як аналог кратера Єзеро"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Lonar crater, India",
+      "lat": 19.98,
+      "lon": 76.51,
+      "bodies": [
+        "mars",
+        "moon"
+      ],
+      "use": "Impact crater in basalt",
+      "uk": {
+        "name": "Кратер Лонар, Індія",
+        "use": "Імпактний кратер у базальті"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Teide National Park, Tenerife",
+      "lat": 28.27,
+      "lon": -16.64,
+      "bodies": [
+        "mars",
+        "moon"
+      ],
+      "use": "Volcanic terrain used for ESA rover field tests",
+      "uk": {
+        "name": "Національний парк Тейде, Тенерифе",
+        "use": "Вулканічний рельєф для польових тестів роверів ESA"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Erfoud–Merzouga, Morocco",
+      "lat": 31.1,
+      "lon": -4,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Desert analog campaigns of the Ibn Battuta Centre",
+      "uk": {
+        "name": "Ерфуд — Мерзуга, Марокко",
+        "use": "Пустельні аналогові кампанії центру Ібн Баттута"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Arkaroola, South Australia",
+      "lat": -30.3,
+      "lon": 139.3,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Arid ranges used for Mars analog expeditions",
+      "uk": {
+        "name": "Аркарула, Південна Австралія",
+        "use": "Посушливі хребти для марсіанських аналогових експедицій"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Axel Heiberg Island",
+      "lat": 79.4,
+      "lon": -90.8,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Perennial cold springs in permafrost",
+      "uk": {
+        "name": "Острів Аксель-Гейберг",
+        "use": "Багаторічні холодні джерела у вічній мерзлоті"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Dumont Dunes, California",
+      "lat": 35.68,
+      "lon": -116.22,
+      "bodies": [
+        "mars"
+      ],
+      "use": "Sand-dune mobility tests for JPL rovers",
+      "uk": {
+        "name": "Дюни Дюмон, Каліфорнія",
+        "use": "Тести прохідності роверів JPL на дюнах"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Cinder Lake Crater Field, Arizona",
+      "lat": 35.29,
+      "lon": -111.47,
+      "bodies": [
+        "moon"
+      ],
+      "use": "Man-made crater field for Apollo training",
+      "uk": {
+        "name": "Поле кратерів Сіндер-Лейк, Аризона",
+        "use": "Штучне поле кратерів для підготовки Apollo"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Pinacate volcanic field, Mexico",
+      "lat": 31.77,
+      "lon": -113.5,
+      "bodies": [
+        "moon"
+      ],
+      "use": "Apollo astronaut geology training",
+      "uk": {
+        "name": "Вулканічне поле Пінакате, Мексика",
+        "use": "Геологічна підготовка астронавтів Apollo"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Rio Grande Gorge, New Mexico",
+      "lat": 36.5,
+      "lon": -105.73,
+      "bodies": [
+        "moon"
+      ],
+      "use": "Apollo 15 training for Hadley Rille",
+      "uk": {
+        "name": "Ущелина Ріо-Гранде, Нью-Мексико",
+        "use": "Підготовка Apollo 15 до борозни Гедлі"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Orocopia Mountains, California",
+      "lat": 33.6,
+      "lon": -115.8,
+      "bodies": [
+        "moon"
+      ],
+      "use": "Apollo 15 field-geology training",
+      "uk": {
+        "name": "Гори Орокопія, Каліфорнія",
+        "use": "Польова геологічна підготовка Apollo 15"
+      },
+      "set": "extended"
+    },
+    {
+      "name": "Kīlauea, Kaʻū Desert, Hawaiʻi (BASALT)",
+      "lat": 19.35,
+      "lon": -155.35,
+      "bodies": [
+        "mars",
+        "moon"
+      ],
+      "use": "NASA BASALT program: Mars exploration on basaltic terrain",
+      "uk": {
+        "name": "Кілауеа, пустеля Кау, Гаваї (BASALT)",
+        "use": "Програма NASA BASALT: дослідження Марса на базальтовому рельєфі"
+      },
+      "set": "extended"
     }
   ]
 }

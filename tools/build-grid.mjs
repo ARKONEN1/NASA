@@ -15,7 +15,7 @@ export const FEATURES = [
   'ts_mean', 'ts_max', 'ts_min', 'ts_range', 'ts_coldest',
   'precip', 'humidity', 'pressure', 'uv', 'wind',
   'elev', 'relief', 'slope',
-  'barren', 'icecover', 'frozen', 'volcanic', 'impact', 'polar', 'cave',
+  'barren', 'icecover', 'frozen', 'volcanic', 'impact', 'polar', 'cave', 'plutonic', 'sediment',
   'country', 'lc_major',                        // country index, most common IGBP land-cover class
 ];
 
@@ -77,6 +77,31 @@ const volcanoes = gvp.slice(1).map((r) => [r[iName], +r[iLat], +r[iLon], /basalt
 const basalt = gvp.slice(1).filter((r) => /basalt/i.test(r[iRock] || '')).map((r) => [+r[iLat], +r[iLon]])
   .filter(([a, b]) => Number.isFinite(a) && Number.isFinite(b));
 log(`basaltic Holocene volcanoes: ${basalt.length} of ${gvp.length - 1}`);
+
+// ---------- Lithology: GLiM (Hartmann & Moosdorf 2012), 0.5° grid ----------
+// Classes: 1 su unconsolidated sediments, 2 vb basic volcanics, 3 ss siliciclastic sedimentary,
+// 4 pb basic plutonics, 5 sm mixed sedimentary, 6 sc carbonates, 7 va acid volcanics, 8 mt metamorphics,
+// 9 pa acid plutonics, 10 vi intermediate volcanics, 11 wb water, 12 py pyroclastics,
+// 13 pi intermediate plutonics, 14 ev evaporites, 15 nd no data, 16 ig ice and glaciers.
+const glimTxt = fs.readFileSync(path.join(RAW, 'glim', 'x', 'glim_wgs84_0point5deg.txt.asc'), 'utf8').split('\n');
+const glim = glimTxt.slice(6).filter((l) => l.trim()).map((l) => l.trim().split(/\s+/).map(Number));
+const LITH = { basalt: new Set([2, 12]), plutonic: new Set([4, 9, 13]), sediment: new Set([1, 3, 5, 6, 14]) };
+/** Share of land cells of a class group in the 3 x 3 GLiM cells (~1.5°) around a point. */
+function lithShare(lat, lon, group) {
+  let hit = 0, n = 0;
+  const r0 = Math.floor((90 - lat) / 0.5), c0 = Math.floor((lon + 180) / 0.5);
+  for (let dr = -1; dr <= 1; dr++)
+    for (let dc = -1; dc <= 1; dc++) {
+      const r = r0 + dr, c = (((c0 + dc) % 720) + 720) % 720;
+      if (r < 0 || r >= 360) continue;
+      const v = glim[r][c];
+      if (v === -9999 || v === 11 || v === 15) continue;
+      n++;
+      if (LITH[group].has(v)) hit++;
+    }
+  return n ? hit / n : 0;
+}
+log(`GLiM rows: ${glim.length} x ${glim[0].length}`);
 
 const caves = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'curated', 'lava-tubes.json'), 'utf8')).caves;
 const craters = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'curated', 'impact-structures.json'), 'utf8')).craters;
@@ -180,7 +205,8 @@ for (let lat = -90; lat <= 90; lat += DLAT) {
       P.PRECTOTCORR[0], P.QV2M[0], P.PS[0], P.ALLSKY_SFC_UV_INDEX[0], P.WS10M[0],
       terr.elev, terr.relief, terr.slope,
       barren / land, icecover, Math.max(icecover, monthsBelow0 / 12),
-      Math.exp(-dBasalt / 60), impact, Math.abs(lat), Math.exp(-dCave / 50),
+      Math.max(Math.exp(-dBasalt / 60), lithShare(lat, lon, 'basalt')), impact, Math.abs(lat), Math.exp(-dCave / 50),
+      lithShare(lat, lon, 'plutonic'), lithShare(lat, lon, 'sediment'),
       ci, lcMajor,
     ]);
   }
@@ -200,6 +226,7 @@ fs.writeFileSync(path.join(WEB_DATA, 'earth-meta.json'), JSON.stringify({
     volcanoes: 'Smithsonian Global Volcanism Program, Holocene volcanoes (basaltic)',
     impacts: 'Earth Impact Database (PASSC, UNB), exposed confirmed structures',
     caves: 'Lava tubes and volcanic caves: hand-compiled list of well-documented systems (incomplete, approximate)',
+    lithology: 'GLiM Global Lithological Map v1.0, 0.5° grid (Hartmann & Moosdorf 2012, PANGAEA, CC BY 3.0)',
     countries: 'Natural Earth 1:50m admin-0 countries',
   },
 }));

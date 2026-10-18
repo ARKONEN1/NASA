@@ -1,6 +1,7 @@
 import {
   FACTORS, FACTOR_KEYS, PURPOSES, buildModel, targetProfile, scoreAll, rankAll,
   topSites, nearestCell, bestCellNear, explain, distanceKm, stabilityRunner, allPurposes,
+  randomLandPoints, ranksNear, aucOf,
 } from './model.js';
 import { t, getLang, setLang, applyStatic, STRINGS } from './i18n.js';
 import { radarSvg, detailRows, logistics } from './extras.js';
@@ -8,7 +9,7 @@ import { radarSvg, detailRows, logistics } from './extras.js';
 const $ = (s) => document.querySelector(s);
 const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1 };
 let model, targets, known, meta, places, bodymaps, detail = {}, logi, scores, ranks, prof, tops = [];
-let stab = new Map(), stabJob = 0; // robustness results for the current choice
+let stab = new Map(), stabJob = 0, randomPts = null; // robustness results for the current choice
 
 // ---------- text helpers ----------
 const S = () => STRINGS[getLang()];
@@ -416,9 +417,15 @@ function renderCheck() {
     .filter((x) => Number.isFinite(x.r)).sort((a, b) => b.r - a.r);
   const median = res.length ? res[Math.floor(res.length / 2)].r : NaN;
   const inTop10 = res.filter((x) => x.r >= 0.9).length;
+  // Fair baseline: random land places get the same "best cell within 60 km" treatment as the sites.
+  randomPts ||= randomLandPoints(model, 300);
+  const rnd = ranksNear(model, scores, ranks, randomPts).sort((a, b) => a - b);
+  const rndMedian = rnd[Math.floor(rnd.length / 2)];
+  const auc = aucOf(res.map((x) => x.r), rnd);
   $('#check').innerHTML = `
     <div class="check-summary">
-      <div><strong>${topShare(median)}</strong> <span>${t('checkMedian', { n: res.length, body: t(`adj_${state.body}`) })}</span></div>
+      <div><strong>${num(auc, 2)}</strong> <span>${t('checkAuc')}</span></div>
+      <div><strong>${topShare(median)}</strong> <span>${t('checkMedian', { n: res.length, body: t(`adj_${state.body}`), rnd: topShare(rndMedian) })}</span></div>
       <div><strong>${inTop10}/${res.length}</strong> <span>${t('checkTop10')}</span></div>
     </div>
     <ul class="check-list">${res.map((x) => {
@@ -609,7 +616,7 @@ const TOUR = [
   { body: 'mars', id: 'jezero', purpose: 'balanced', ll: [-24.0, -68.75] },
   { body: 'mars', id: 'arsia', purpose: 'geology', ll: [25.5, 40.0] },
   { body: 'mars', id: 'arcadia', purpose: 'ice', ll: [82.0, -19.375] },
-  { body: 'moon', id: 'shackleton', purpose: 'balanced', ll: [39.0, 73.75] },
+  { body: 'moon', id: 'shackleton', purpose: 'rover', ll: [39.0, 73.75] },
   { body: 'moon', id: 'hadley', purpose: 'rover', ll: [-24.0, -68.125] },
 ];
 let tourStep = -1;

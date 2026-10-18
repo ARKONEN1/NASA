@@ -24,6 +24,8 @@ export const FACTORS = {
   volcanic: { label: 'Basaltic volcanism nearby', short: 'Basaltic volcanism', degree: true, group: 'Surface' },
   impact:   { label: 'Impact crater nearby', short: 'Impact crater', degree: true, group: 'Surface' },
   cave:     { label: 'Lava tube nearby', short: 'Lava tube', degree: true, group: 'Surface' },
+  plutonic: { label: 'Crystalline plutonic rock (like lunar highlands)', short: 'Plutonic rock', degree: true, group: 'Surface' },
+  sediment: { label: 'Sedimentary rock and evaporites', short: 'Sedimentary rock', degree: true, group: 'Surface' },
 };
 export const FACTOR_KEYS = Object.keys(FACTORS);
 
@@ -39,7 +41,7 @@ export const PURPOSES = {
     // itself: otherwise Earth's ice sheets win, though polar deserts with permafrost are the real match.
     w: { frozen: 3, ts_mean: 2, ts_min: 2, humidity: 1, precip: 1, barren: 3, relief: 1 } },
   geology: { label: 'Geology & sampling', blurb: 'Basaltic lava and impact craters on bare ground — field-geology training.',
-    w: { volcanic: 3, impact: 3, barren: 2, relief: 1, slope: 1, precip: 1, cave: 2 } },
+    w: { volcanic: 3, impact: 3, barren: 2, relief: 1, slope: 1, precip: 1, cave: 2, plutonic: 2, sediment: 2 } },
   light: { label: 'Light & power', blurb: 'Low sun and long shadows for solar power, cameras and navigation.',
     w: { polar: 3, ts_min: 1, ts_mean: 1, relief: 1.5, barren: 1 } },
 };
@@ -98,6 +100,7 @@ export function targetFactors(t) {
     pressure: c.pressure, uv: c.uv, wind: c.wind ?? null, polar: Math.abs(t.lat),
     relief: t.terrain.relief, slope: t.terrain.slope,
     barren: 1, volcanic: t.volcanic, impact: t.impact, cave: t.cave ?? null,
+    plutonic: t.plutonic ?? 0, sediment: t.sediment ?? 0,
   };
 }
 
@@ -229,6 +232,36 @@ export function stabilityRunner(model, prof, weights, cells, runs = STABILITY_RU
     progress: () => done / runs,
     result: () => new Map([...hits].map(([i, h]) => [i, h / Math.max(1, done)])),
   };
+}
+
+// ---------- method check: ROC AUC ----------
+// Probability that a known analog site ranks above a random place on land. Random places get the
+// same treatment as the known sites (best cell within 60 km), so the comparison is fair.
+/** n random land points, area-weighted, seeded. */
+export function randomLandPoints(model, n = 400, seed = 7) {
+  const rnd = mulberry32(seed);
+  const cum = new Float64Array(model.n);
+  let acc = 0;
+  for (let i = 0; i < model.n; i++) { acc += model.w[i]; cum[i] = acc; }
+  const pts = [];
+  for (let k = 0; k < n; k++) {
+    const x = rnd() * acc;
+    let lo = 0, hi = model.n - 1;
+    while (lo < hi) { const m = (lo + hi) >> 1; if (cum[m] < x) lo = m + 1; else hi = m; }
+    pts.push([model.col.lat[lo], model.col.lon[lo]]);
+  }
+  return pts;
+}
+/** AUC of known-site ranks against random-place ranks (0.5 = no better than chance). */
+export function aucOf(known, random) {
+  if (!known.length || !random.length) return NaN;
+  let s = 0;
+  for (const k of known) for (const r of random) s += k > r ? 1 : k === r ? 0.5 : 0;
+  return s / (known.length * random.length);
+}
+/** Ranks of the best cell within 60 km of each point. */
+export function ranksNear(model, scores, ranks, points) {
+  return points.map(([la, lo]) => bestCellNear(model, scores, la, lo)).filter((i) => i >= 0).map((i) => ranks[i]);
 }
 
 /** Score and rank of one cell for every purpose (for the site dossier). */

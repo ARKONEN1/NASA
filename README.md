@@ -25,23 +25,26 @@ The interface is in English and Ukrainian (switch in the header).
 | Factor | Earth (per cell) | Moon / Mars (per site) |
 |---|---|---|
 | Relief, slope | ETOPO1, sampled on the same 15×15 grid, 3.7 km apart, as the other bodies | LRO LOLA LDEM_16 (LDEM_75S_240M near the south pole); MGS MOLA MEGDR 128 px/deg around each site |
-| Ground temperature: mean, day–night swing, night | NASA POWER climatology 2001–2025 (MERRA-2 skin temperature) | LRO Diviner; Curiosity REMS, Perseverance MEDA, Phoenix, InSight, Mars Climate Database (rounded) |
-| Precipitation, air moisture, pressure, UV, wind | NASA POWER (UV from CERES) | literature values (no rain, almost no water vapour, 0–0.9 kPa) |
+| Ground temperature: mean, day–night swing, night | NASA POWER climatology 2001–2025 (MERRA-2 skin temperature) | Moon: LRO Diviner Global Cumulative Products (bolometric temperature, 96 local-time bins, 3 × 3 cells of 0.5°). Mars: Mars Climate Database v6.2, 12 seasons × 24 h |
+| Air pressure, moisture, wind | NASA POWER | Mars: Mars Climate Database v6.2 (surface pressure, water vapour, 10 m wind). Moon: no air |
+| Precipitation, UV | NASA POWER (UV from CERES) | none falls on either body; surface UV is beyond any Earth value on both |
 | Bare ground, ice cover | MODIS IGBP land cover 2024 via NASA GIBS | always bare |
 | Frozen ground | share of months below 0 °C, or ice cover | 0–1 from known ground ice |
-| Basaltic volcanism | distance to Holocene basaltic volcanoes (Smithsonian GVP) | 0–1 from site geology |
+| Basaltic volcanism | basic volcanic rock in GLiM (3 × 3 cells), or distance to Holocene basaltic volcanoes (Smithsonian GVP) | 0–1 from site geology |
+| Plutonic rock (like lunar highlands) | acid, intermediate and basic plutonic rock in the GLiM lithological map | 0–1 from site geology (1 for the anorthositic south-pole highlands) |
+| Sedimentary rock and evaporites | sedimentary rock, unconsolidated sediment and evaporites in GLiM | 0–1 from site geology (lake deposits at Gale and Jezero, sulfates at Meridiani) |
 | Impact cratering | distance to exposed confirmed craters (Earth Impact Database) | 0–1 from site geology |
 | Low sun | latitude | latitude |
 | Lava tube nearby | distance to a hand-compiled list of 22 well-documented lava tubes | only for cave sites (Marius Hills, Arsia Mons, Hadley Rille) |
-| Terrain up close (shown, not scored) | ESA Copernicus DEM GLO-30, 240 m level, for 1,525 candidates | LOLA 240 m / LDEM_64; MOLA 128 px/deg |
+| Terrain up close (shown, not scored) | ESA Copernicus DEM GLO-30, 240 m level, for about 2,000 candidates | LOLA 240 m / LDEM_64; MOLA 128 px/deg |
 
 Earth can't match the Moon or Mars in absolute terms. So each factor is ranked among Earth's land (area-weighted percentile), and a value beyond Earth's range points to Earth's most extreme end. Similarity per factor = 1 − |percentile difference|, and the score is a weighted mean with weights set by the chosen purpose.
 
-**Method check (full data):** across all sites and purposes, known analogs have a median rank between 64 % and 98 % (random = 50 %). The weakest case is Moon × Habitats (64 %). The diagnosis is that known lunar analogs (Hawaiʻi, Arizona, Ries, Sudbury) were chosen for geology and terrain, not climate, so they show no lift in temperature, rain or air pressure. There is no ground truth for lunar thermal analogs on Earth.
+**Method check:** for every body × purpose the app and `npm run validate` report the ROC AUC, the chance that a known analog site outranks a random place on land given the same "best cell within 60 km" treatment (0.5 = chance). On the original 19 sites the AUC ranges from 0.60 to 0.80 (Geology 0.80 / 0.76, Rovers 0.75 / 0.75 for Moon / Mars); on the extended list of 31 sites it is 0.56–0.77. The weakest case is Moon × Habitats (AUC 0.60, or 0.56 on the extended list). The diagnosis is that known lunar analogs (Hawaiʻi, Arizona, Ries, Sudbury) were chosen for geology and terrain, not climate, so they show no lift in temperature, rain or air pressure. There is no ground truth for lunar thermal analogs on Earth.
 
-**Robustness:** every candidate is re-scored 60 times with each weight scaled by a random factor in [0.5, 1.5] and each target position shifted by ±0.05 on Earth's scale (seeded, reproducible). Across all 90 top-10 lists (15 sites × 6 purposes), 93.4 % of places stay in the top 1 % of Earth's land in at least 90 % of runs, and the first place does so in 89 of 90 lists. Run `node tools/robustness.mjs`.
+**Robustness:** every candidate is re-scored 60 times with each weight scaled by a random factor in [0.5, 1.5] and each target position shifted by ±0.05 on Earth's scale (seeded, reproducible). Across all 90 top-10 lists (15 sites × 6 purposes), 94.2 % of places stay in the top 1 % of Earth's land in at least 90 % of runs, and the first place does so in 88 of 90 lists. Run `node tools/robustness.mjs`.
 
-**Limits:** gravity, vacuum and radiation can't be matched, so every analog is partial. The 0.5° grid doesn't resolve single caves or crater rims. Moon and Mars climate figures are rounded literature values. The lava-tube list is hand-compiled and incomplete. The geology check is partly circular, because some known analogs are famous for the very craters and volcanoes in the catalogues.
+**Limits:** gravity, vacuum and radiation can't be matched, so every analog is partial. The 0.5° grid doesn't resolve single caves or crater rims. Moon and Mars climate comes from LRO Diviner and the Mars Climate Database (a model fitted to spacecraft data), not from ground measurements. Switching from rounded literature values to these products barely changed the method check, so the results do not hinge on them. The lava-tube list is hand-compiled and incomplete. The geology check is partly circular, because some known analogs are famous for the very craters and volcanoes in the catalogues.
 
 ## Run locally
 
