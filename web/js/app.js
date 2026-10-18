@@ -40,8 +40,8 @@ function fmtValue(f, v) {
   return `${num(v, d.digits)}${u ? (u === '°' || u === '°C' ? '' : ' ') + u : ''}`;
 }
 function meter(sim) {
-  const v = Number.isFinite(sim) ? sim : 0, [cr, cg, cb] = ramp(0.25 + v * 0.75);
-  return `<div class="meter"><div class="bar"><i style="width:${Math.max(3, v * 100)}%;background:rgb(${cr},${cg},${cb})"></i></div><b>${Number.isFinite(sim) ? Math.round(sim * 100) + '%' : '—'}</b></div>`;
+  const v = Number.isFinite(sim) ? sim : 0;
+  return `<div class="meter"><div class="bar"><i style="width:${Math.max(3, v * 100)}%;--v:${v.toFixed(3)}"></i></div><b>${Number.isFinite(sim) ? Math.round(sim * 100) + '%' : '—'}</b></div>`;
 }
 function countryOf(i) {
   const c = meta.countries[model.col.country[i]];
@@ -147,6 +147,18 @@ function renderLang() {
   });
 }
 
+let themeTimer;
+function setTheme(body) {
+  if (document.body.dataset.body === body) return false;
+  document.body.classList.add('theme-shift');
+  document.body.dataset.body = body;
+  clearTimeout(themeTimer);
+  themeTimer = setTimeout(() => document.body.classList.remove('theme-shift'), 1000);
+  return true;
+}
+// Re-scoring blocks the page for a moment; run it after the colour fade so the fade stays smooth.
+const afterFade = (changed, fn) => (changed ? setTimeout(fn, 950) : fn());
+
 function renderBodies() {
   document.querySelectorAll('.segmented button').forEach((b) => {
     b.setAttribute('aria-checked', String(b.dataset.body === state.body));
@@ -154,8 +166,9 @@ function renderBodies() {
       if (state.body === b.dataset.body) return;
       state.body = b.dataset.body;
       state.targetId = targets[state.body][0].id;
-      document.body.dataset.body = state.body;
-      renderBodies(); renderTargets(); renderWeights(); recompute(); drawKnown();
+      const changed = setTheme(state.body);
+      renderBodies(); renderTargets(); renderWeights();
+      afterFade(changed, () => { recompute(); drawKnown(); });
     };
   });
   $('#site-h').textContent = t(`stepSite_${state.body}`);
@@ -430,8 +443,7 @@ function renderCheck() {
       <div><strong>${inTop10}/${res.length}</strong> <span>${t('checkTop10')}</span></div>
     </div>
     <ul class="check-list">${res.map((x) => {
-      const [cr, cg, cb] = ramp(x.r);
-      return `<li data-i="${x.i}" title="${esc(tx(x.s, 'use'))}"><span class="nm">${esc(tx(x.s, 'name'))}</span><div class="bar"><i style="width:${x.r * 100}%;background:rgb(${cr},${cg},${cb})"></i></div><span class="pc">${beatPct(x.r)}%</span></li>`;
+      return `<li data-i="${x.i}" title="${esc(tx(x.s, 'use'))}"><span class="nm">${esc(tx(x.s, 'name'))}</span><div class="bar"><i style="width:${x.r * 100}%;--v:${x.r.toFixed(3)}"></i></div><span class="pc">${beatPct(x.r)}%</span></li>`;
     }).join('')}</ul>
     ${liftHtml(res)}`;
   document.querySelectorAll('.check-list li').forEach((li) => (li.onclick = () => select(+li.dataset.i)));
@@ -566,12 +578,11 @@ function goTo(body, id, purpose, la, lo, zoom = 3) {
   state.targetId = id;
   state.purpose = purpose;
   state.weights = Object.fromEntries(FACTOR_KEYS.map((f) => [f, PURPOSES[purpose].w[f] || 0]));
-  document.body.dataset.body = body;
+  const changed = setTheme(body);
   const i = nearestCell(model, la, lo, 80);
   if (i >= 0) state.pendingCell = i;
-  renderBodies(); renderTargets(); renderPurposes(); renderWeights(); drawKnown();
-  recompute();
-  map.setView([la, lo], zoom);
+  renderBodies(); renderTargets(); renderPurposes(); renderWeights();
+  afterFade(changed, () => { drawKnown(); recompute(); map.setView([la, lo], zoom); });
 }
 
 // ---------- site dossier: one printable page per candidate ----------
@@ -644,7 +655,7 @@ $('#tour-btn').onclick = () => showTour(0);
 window.addEventListener('hashchange', () => {
   if (!model) return;
   readHash();
-  document.body.dataset.body = state.body;
+  setTheme(state.body);
   renderBodies(); renderTargets(); renderPurposes(); renderWeights(); drawKnown();
   recompute();
 });
@@ -680,7 +691,7 @@ applyStatic(); renderLang();
     known = kn.sites;
     state.targetId = targets.moon[0].id;
     readHash();
-    document.body.dataset.body = state.body;
+    setTheme(state.body);
     renderAll();
     recompute();
     $('#map-status').classList.add('hidden');
