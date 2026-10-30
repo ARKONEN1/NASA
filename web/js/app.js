@@ -519,7 +519,7 @@ function vsKnownHtml(i, compact = false) {
   const diffs = explain(model, k, prof, state.weights)
     .filter((r) => r.weight > 0 && Number.isFinite(r.sim) && Number.isFinite(a.get(r.f)?.sim))
     .map((r) => ({ f: r.f, d: (a.get(r.f).sim - r.sim) * r.weight }));
-  const list = (arr) => arr.slice(0, 3).map((x) => `<span>${esc(fShort(x.f))}</span>`).join('') || '<span>—</span>';
+  const list = (arr) => arr.slice(0, 3).map((x) => `<span>${esc(fShort(x.f))}</span>`).join('') || '<span class="vs-none">—</span>';
   const closer = diffs.filter((x) => x.d > 0.05).sort((p, q) => q.d - p.d);
   const farther = diffs.filter((x) => x.d < -0.05).sort((p, q) => p.d - q.d);
   const delta = `<b class="${d > 0 ? 'up' : d < 0 ? 'down' : ''}">${d > 0 ? '+' : ''}${d}</b>`;

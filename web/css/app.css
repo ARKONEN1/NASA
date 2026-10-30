@@ -276,8 +276,8 @@ a { color: var(--accent); }
 .vs-show { border: 1px solid var(--line); background: var(--panel-2); color: var(--text); border-radius: 6px; padding: 3px 10px; font-size: 12px; cursor: pointer; }
 .vs-show:hover { border-color: var(--accent); }
 .vs-chips { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-.vs-chips span:not(.vs-k) { border: 1px solid color-mix(in srgb, var(--good) 45%, transparent); color: var(--good); border-radius: 999px; padding: 0 9px; font-size: 12px; }
-.vs-chips.farther span:not(.vs-k) { border-color: color-mix(in srgb, var(--bad) 45%, transparent); color: var(--bad); }
+.vs-chips span:not(.vs-k):not(.vs-none) { border: 1px solid color-mix(in srgb, var(--good) 45%, transparent); color: var(--good); border-radius: 999px; padding: 0 9px; font-size: 12px; }
+.vs-chips.farther span:not(.vs-k):not(.vs-none) { border-color: color-mix(in srgb, var(--bad) 45%, transparent); color: var(--bad); }
 .vs-k { margin-right: 4px; min-width: 120px; }
 @container (max-width: 640px) { .vs { grid-template-columns: 1fr; } .vs-k { min-width: 0; } }
 .dossier .vs { display: block; border: 0; padding: 0; margin: 6pt 0 0; color: #444; }
