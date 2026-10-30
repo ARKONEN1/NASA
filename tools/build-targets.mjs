@@ -102,8 +102,8 @@ for (const [body, cfg] of Object.entries(BODIES)) {
     // on either body; the Moon has no air; surface UV is beyond any Earth value on both.
     const c = body === 'moon' ? await moonClimate(t.lat, t.lon) : await marsClimate(t.id, t.lat, t.lon);
     const climate = body === 'moon'
-      ? { ts_mean: c.ts_mean, ts_max: c.ts_max, ts_min: c.ts_min, precip: 0, humidity: 0, pressure: 0, uv: 20, wind: null }
-      : { ts_mean: c.ts_mean, ts_max: c.ts_max, ts_min: c.ts_min, precip: 0, humidity: c.humidity, pressure: c.pressure, uv: 20, wind: c.wind };
+      ? { ts_mean: c.ts_mean, ts_max: c.ts_max, ts_min: c.ts_min, precip: 0, humidity: 0, pressure: 0, uv: 20, wind: null, dust: null }
+      : { ts_mean: c.ts_mean, ts_max: c.ts_max, ts_min: c.ts_min, precip: 0, humidity: c.humidity, pressure: c.pressure, uv: 20, wind: c.wind, dust: c.dust };
     log('   climate', JSON.stringify(climate));
     out[body].push({ ...t, climate, climateLiterature: t.climate, terrain: { relief: +terr.relief.toFixed(1), slope: +terr.slope.toFixed(3), elev: Math.round(terr.elev) }, detail });
   }
@@ -112,7 +112,7 @@ fs.writeFileSync(path.join(WEB_DATA, 'targets.json'), JSON.stringify({
   sources: {
     moon: BODIES.moon.demSource, mars: BODIES.mars.demSource,
     moonClimate: 'Moon surface temperature: LRO Diviner Global Cumulative Products (Williams et al. 2017), bolometric temperature, 3 x 3 cells of 0.5°, 96 local-time bins',
-    marsClimate: 'Mars surface temperature, pressure, 10 m wind and water vapour: Mars Climate Database v6.2 (LMD/OU/IAA/ESA/CNES), climatology scenario, 12 seasons x 24 h',
+    marsClimate: 'Mars surface temperature, pressure, 10 m wind, water vapour and dust column optical depth: Mars Climate Database v6.2 (LMD/OU/IAA/ESA/CNES), climatology scenario, 12 seasons x 24 h',
   },
   thumbKm: THUMB_KM, ...out,
 }, null, 1));

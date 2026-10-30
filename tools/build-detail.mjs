@@ -7,7 +7,8 @@ import path from 'node:path';
 import { fromUrl } from 'geotiff';
 import { ROOT, WEB_DATA, pool, log } from './lib.mjs';
 import { detailAt } from './terrain.mjs';
-import { PURPOSES, FACTOR_KEYS, buildModel, targetProfile, scoreAll, topSites, nearestCell } from '../web/js/model.js';
+import { PURPOSES, FACTOR_KEYS, buildModel, targetProfile, scoreAll, topSites, nearestCell, distanceKm } from '../web/js/model.js';
+import { studiedRegion } from '../web/js/studied.js';
 
 const meta = JSON.parse(fs.readFileSync(path.join(WEB_DATA, 'earth-meta.json'), 'utf8'));
 const bin = fs.readFileSync(path.join(WEB_DATA, 'earth-cells.bin'));
@@ -16,13 +17,21 @@ const targets = JSON.parse(fs.readFileSync(path.join(WEB_DATA, 'targets.json'), 
 const known = JSON.parse(fs.readFileSync(path.join(ROOT, 'data', 'curated', 'known-analogs.json'), 'utf8')).sites;
 
 // ---------- candidate cells ----------
+// Same rule as the app: no test site within 150 km and outside the well-known analog regions.
+const isNew = (i) => {
+  const la = model.col.lat[i], lo = model.col.lon[i];
+  return !studiedRegion(la, lo) && !known.some((k) => distanceKm(k.lat, k.lon, la, lo) < 150);
+};
 const cand = new Set();
 for (const body of ['moon', 'mars'])
   for (const t of targets[body]) {
     const prof = targetProfile(model, t);
     for (const p of Object.values(PURPOSES)) {
       const w = Object.fromEntries(FACTOR_KEYS.map((f) => [f, p.w[f] || 0]));
-      for (const i of topSites(model, scoreAll(model, prof, w), 50, 250)) cand.add(i);
+      const scores = scoreAll(model, prof, w);
+      for (const i of topSites(model, scores, 50, 250)) cand.add(i);
+      // and the lists with "only little-studied places" ticked
+      for (const i of topSites(model, scores, 50, 250, isNew)) cand.add(i);
     }
   }
 for (const s of known) { const i = nearestCell(model, s.lat, s.lon, 80); if (i >= 0) cand.add(i); }

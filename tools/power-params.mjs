@@ -8,4 +8,6 @@ export const POWER_PARAMS = [
   'PS',                  // surface pressure, kPa
   'ALLSKY_SFC_UV_INDEX', // all-sky UV index
   'WS10M',               // wind speed at 10 m, m/s
+  'AOD_55',              // aerosol optical depth at 550 nm (MERRA-2)
+  'AOD_84',              // ... and at 840 nm: the ratio (Angstrom exponent) tells coarse dust from fine smoke and smog
 ];

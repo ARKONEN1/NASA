@@ -10,10 +10,20 @@ import { makeDem, terrainAt } from './terrain.mjs';
 import { POWER_PARAMS } from './power-params.mjs';
 
 const EARTH_R = 6371;
+
+// Dust share of the aerosol from the Angstrom exponent between 550 and 840 nm: coarse desert dust
+// dims both wavelengths alike (exponent near 0), fine smoke and smog much less at 840 nm (exponent
+// 1.5 and more). Exponent <= 0.4 counts as all dust, >= 1.2 as none, linear in between.
+function dustAod(a55, a84) {
+  if (!Number.isFinite(a55)) return NaN;
+  if (a55 < 0.02 || !(a84 > 0)) return a55;
+  const angstrom = Math.log(a55 / a84) / Math.log(840 / 550);
+  return a55 * Math.min(1, Math.max(0, (1.2 - angstrom) / 0.8));
+}
 export const FEATURES = [
   'lat', 'lon', 'land',                         // cell centre, land fraction
   'ts_mean', 'ts_max', 'ts_min', 'ts_range', 'ts_coldest',
-  'precip', 'humidity', 'pressure', 'uv', 'wind',
+  'precip', 'humidity', 'pressure', 'uv', 'wind', 'dust',
   'elev', 'relief', 'slope',
   'barren', 'icecover', 'frozen', 'volcanic', 'impact', 'polar', 'cave', 'plutonic', 'sediment',
   'country', 'lc_major',                        // country index, most common IGBP land-cover class
@@ -202,7 +212,7 @@ for (let lat = -90; lat <= 90; lat += DLAT) {
     rows.push([
       lat, lon, land / total,
       P.TS[0], tsMax, tsMin, tsMax - tsMin, Math.min(...P.TS_MIN.slice(1)),
-      P.PRECTOTCORR[0], P.QV2M[0], P.PS[0], P.ALLSKY_SFC_UV_INDEX[0], P.WS10M[0],
+      P.PRECTOTCORR[0], P.QV2M[0], P.PS[0], P.ALLSKY_SFC_UV_INDEX[0], P.WS10M[0], dustAod(P.AOD_55[0], P.AOD_84[0]),
       terr.elev, terr.relief, terr.slope,
       barren / land, icecover, Math.max(icecover, monthsBelow0 / 12),
       Math.max(Math.exp(-dBasalt / 60), lithShare(lat, lon, 'basalt')), impact, Math.abs(lat), Math.exp(-dCave / 50),
@@ -221,6 +231,7 @@ fs.writeFileSync(path.join(WEB_DATA, 'earth-meta.json'), JSON.stringify({
   n: rows.length, features: FEATURES, grid: { dLat: DLAT, dLon: DLON }, countries,
   sources: {
     climate: 'NASA POWER climatology 2001–2025 (MERRA-2; UV from CERES), power.larc.nasa.gov',
+    dust: 'Dust: MERRA-2 aerosol optical depth at 550 nm via NASA POWER, coarse (dust) share from the 550/840 nm Angstrom exponent',
     relief: 'NOAA ETOPO1 ice-surface relief via NOAA CoastWatch ERDDAP, sampled at 2′',
     landcover: 'MODIS Combined IGBP Land Cover 2024 (MCD12Q1) via NASA GIBS',
     volcanoes: 'Smithsonian Global Volcanism Program, Holocene volcanoes (basaltic)',

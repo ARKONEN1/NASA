@@ -5,9 +5,10 @@ import {
 } from './model.js';
 import { t, getLang, setLang, applyStatic, STRINGS } from './i18n.js';
 import { radarSvg, detailRows, logistics } from './extras.js';
+import { studiedRegion } from './studied.js';
 
 const $ = (s) => document.querySelector(s);
-const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1 };
+const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1, onlyNew: false };
 let model, targets, known, meta, places, bodymaps, detail = {}, logi, scores, ranks, prof, tops = [];
 let stab = new Map(), stabJob = 0, randomPts = null; // robustness results for the current choice
 
@@ -283,6 +284,21 @@ function whyLine(i) {
     (bad && bad.sim < 0.6 ? ` · ${t('differs', { f: lowerFirst(fShort(bad.f)) })}` : '');
 }
 const knownNear = (i, km = 150) => known.find((s) => distanceKm(s.lat, s.lon, model.col.lat[i], model.col.lon[i]) < km);
+// "new" = no test site within 150 km AND outside the regions the challenge names as well known.
+function statusOf(i) {
+  const kn = knownNear(i);
+  if (kn) return { kind: 'known', kn };
+  const region = studiedRegion(model.col.lat[i], model.col.lon[i]);
+  return region ? { kind: 'studied', region } : { kind: 'new' };
+}
+const isNew = (i) => statusOf(i).kind === 'new';
+const regionName = (r) => (getLang() === 'uk' ? r.uk : r.en);
+function tagHtml(i, long = false) {
+  const st = statusOf(i);
+  if (st.kind === 'known') return `<span class="tag known" title="${esc(t('knownNear', { name: tx(st.kn, 'name') }))}">${t('tagKnown')}${long ? ': ' + esc(tx(st.kn, 'name')) : ''}</span>`;
+  if (st.kind === 'studied') return `<span class="tag studied" title="${esc(t('studiedHint', { name: regionName(st.region) }))}">${t('tagStudied')}${long ? ': ' + esc(regionName(st.region)) : ''}</span>`;
+  return `<span class="tag new" title="${esc(t('newHint'))}">${t('tagNew')}</span>`;
+}
 
 function renderSites() {
   const ol = $('#sites');
@@ -293,16 +309,15 @@ function renderSites() {
     li.tabIndex = 0;
     li.setAttribute('aria-selected', String(i === state.selected));
     li.title = fmtCoords(model.col.lat[i], model.col.lon[i]);
-    const kn = knownNear(i);
     li.innerHTML = `<div class="site-top"><span class="n">${k + 1}</span><span class="where">${esc(countryOf(i))}</span><span class="score" title="${esc(t('scoreHint'))}">${Math.round(scores[i] * 100)}<small>${t('scoreWord')}</small></span></div>
-      <div class="site-meta">${kn ? `<span class="tag known" title="${esc(t('knownNear', { name: tx(kn, 'name') }))}">${t('tagKnown')}</span>` : `<span class="tag new">${t('tagNew')}</span>`}
+      <div class="site-meta">${tagHtml(i)}
         <span>${topShare(ranks[i])}</span><span class="stab${(stab.get(i) ?? 1) < 0.8 ? ' weak' : ''}" title="${esc(t('stabilityHint'))}">${stabText(i)}</span></div>
       <div class="why">${esc(whyLine(i))}</div>`;
     li.onclick = () => select(i);
     li.onkeydown = (e) => { if (e.key === 'Enter') select(i); };
     ol.append(li);
   });
-  $('#top-hint').textContent = t('topHint', { n: tops.filter((i) => !knownNear(i)).length, total: tops.length });
+  $('#top-hint').textContent = t('topHint', { n: tops.filter(isNew).length, total: tops.length });
 }
 
 function gibs(layer, la, lo, km = 150, px = 320) {
@@ -346,7 +361,6 @@ function renderCompare() {
   const body = $('#compare-body'), tg = target(), i = state.selected;
   if (i < 0) { body.innerHTML = ''; return; }
   const la = model.col.lat[i], lo = model.col.lon[i];
-  const kn = knownNear(i);
   const tName = tx(tg, 'name');
   let html = `
     <div class="cmp-media">
@@ -356,7 +370,7 @@ function renderCompare() {
         <span class="coords">${fmtCoords(tg.lat, tg.lon)}</span>
       </div>
       <div class="cmp-side" style="grid-area:eh">
-        <span class="label">${t('earth')}${kn ? ` · ${esc(t('near', { name: tx(kn, 'name') }))}` : ''}</span>
+        <span class="label">${t('earth')} · ${tagHtml(i, true)}</span>
         <span class="title">${esc(countryOf(i))}</span>
         <span class="coords">${fmtCoords(la, lo)}</span>
       </div>
@@ -487,7 +501,7 @@ function recompute() {
   prof = targetProfile(model, target());
   scores = scoreAll(model, prof, state.weights);
   ranks = rankAll(model, scores);
-  tops = topSites(model, scores, 10, 400);
+  tops = topSites(model, scores, 10, 400, state.onlyNew ? isNew : undefined);
   computeMeanSim();
   drawScoreLayer();
   renderCheck();
@@ -501,14 +515,15 @@ function recompute() {
 
 // ---------- export ----------
 function exportRows() {
-  const list = topSites(model, scores, 50, 250);
+  const list = topSites(model, scores, 50, 250, state.onlyNew ? isNew : undefined);
   const tg = target();
   return list.map((i, k) => {
     const kn = knownNear(i);
     const row = {
       rank: k + 1, lat: +model.col.lat[i].toFixed(3), lon: +model.col.lon[i].toFixed(3),
       country: meta.countries[model.col.country[i]]?.[0] ?? '', score: Math.round(scores[i] * 100),
-      top_percent: +((1 - ranks[i]) * 100).toFixed(2), status: kn ? 'known' : 'new', known_site: kn?.name ?? '',
+      top_percent: +((1 - ranks[i]) * 100).toFixed(2), status: statusOf(i).kind, known_site: kn?.name ?? '',
+      studied_region: statusOf(i).region?.en ?? '',
       land_cover: STRINGS.en.landcover[model.col.lc_major[i]] ?? '', elevation_m: Math.round(model.col.elev[i]),
       target: tg.name, target_lat: tg.lat, target_lon: tg.lon, purpose: STRINGS.en.purposes[state.purpose][0],
       stability: stab.has(i) ? +stab.get(i).toFixed(2) : '',
@@ -533,6 +548,7 @@ function download(name, text, type) {
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 }
 const exportName = (ext) => `analog-atlas_${state.targetId}_${state.purpose}.${ext}`;
+$('#only-new').addEventListener('change', (e) => { state.onlyNew = e.target.checked; recompute(); });
 $('#export-csv').onclick = () => {
   const rows = exportRows(), cols = Object.keys(rows[0]);
   const cell = (v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : v);
@@ -587,7 +603,7 @@ function goTo(body, id, purpose, la, lo, zoom = 3) {
 
 // ---------- site dossier: one printable page per candidate ----------
 async function openDossier(i) {
-  const tg = target(), la = model.col.lat[i], lo = model.col.lon[i], kn = knownNear(i);
+  const tg = target(), la = model.col.lat[i], lo = model.col.lon[i];
   const all = allPurposes(model, prof, i);
   const rows = explain(model, i, prof, state.weights);
   const box = $('#dossier');
@@ -599,7 +615,7 @@ async function openDossier(i) {
         <h1>${esc(countryOf(i))} · ${fmtCoords(la, lo)}</h1>
         <p>${t('dossierFor', { target: esc(tx(tg, 'name')), body: esc(t(state.body)), purpose: esc(lowerFirst(pName(state.purpose))) })}</p></div>
       <div class="ds-score"><b>${Math.round(scores[i] * 100)}</b><span>${esc(topShare(ranks[i]))}</span><span>${stabText(i)}</span>
-        <span class="tag ${kn ? 'known' : 'new'}">${kn ? `${t('tagKnown')}: ${esc(tx(kn, 'name'))}` : t('tagNew')}</span></div>
+        ${tagHtml(i, true)}</div>
     </header>
     <section class="ds-cols">
       <div><h2>${t('earth')}</h2><p class="site-facts">${siteFacts(i)}</p>${nearbyHtml(la, lo)}${logisticsHtml(la, lo)}

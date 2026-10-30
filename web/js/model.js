@@ -17,6 +17,7 @@ export const FACTORS = {
   pressure: { label: 'Air pressure', short: 'Air pressure', unit: 'kPa', digits: 1, group: 'Sky' },
   uv:       { label: 'UV at the surface', short: 'UV', unit: 'index', digits: 1, group: 'Sky' },
   wind:     { label: 'Wind', short: 'Wind', unit: 'm/s', digits: 1, group: 'Sky' },
+  dust:     { label: 'Dust in the air (optical depth of coarse aerosol)', short: 'Dust', unit: 'AOD', digits: 2, group: 'Sky' },
   polar:    { label: 'Low sun angle (latitude)', short: 'Low sun', unit: '°', digits: 0, group: 'Sky' },
   relief:   { label: 'Terrain relief (52 km window)', short: 'Relief', unit: 'm', digits: 0, group: 'Terrain' },
   slope:    { label: 'Typical slope (3.7 km scale)', short: 'Slope', unit: '°', digits: 1, group: 'Terrain' },
@@ -33,15 +34,19 @@ export const PURPOSES = {
   balanced: { label: 'All conditions', blurb: 'Every factor counts equally.',
     w: Object.fromEntries(FACTOR_KEYS.map((k) => [k, 1])) },
   rover: { label: 'Rovers & spacewalks', blurb: 'Terrain to drive and walk on: relief, slopes, bare rocky ground.',
-    w: { relief: 3, slope: 3, barren: 3, impact: 1, volcanic: 1, precip: 1, humidity: 0.5 } },
+    w: { relief: 3, slope: 3, barren: 3, impact: 1, volcanic: 1, precip: 1, humidity: 0.5, dust: 1 } },
   habitat: { label: 'Habitats & long stays', blurb: 'Harsh thermal cycles, thin dry air and strong UV for living and working.',
-    w: { ts_mean: 2, ts_range: 2, ts_min: 2, pressure: 2, uv: 1.5, humidity: 1, precip: 1, barren: 1, wind: 1, cave: 1.5 } },
+    w: { ts_mean: 2, ts_range: 2, ts_min: 2, pressure: 2, uv: 1.5, humidity: 1, precip: 1, barren: 1, wind: 1, dust: 1, cave: 1.5 } },
   ice: { label: 'Ice & resource mining', blurb: 'Frozen ground in cold, dry places — for drills and water extraction.',
     // Ground ice on Mars and the Moon lies under bare regolith, so bare ground weighs as much as the ice
     // itself: otherwise Earth's ice sheets win, though polar deserts with permafrost are the real match.
     w: { frozen: 3, ts_mean: 2, ts_min: 2, humidity: 1, precip: 1, barren: 3, relief: 1 } },
   geology: { label: 'Geology & sampling', blurb: 'Basaltic lava and impact craters on bare ground — field-geology training.',
     w: { volcanic: 3, impact: 3, barren: 2, relief: 1, slope: 1, precip: 1, cave: 2, plutonic: 2, sediment: 2 } },
+  landing: { label: 'Landing & construction', blurb: 'Flat, open, loose bare ground for landing pads, roads and building with local material.',
+    // Gentle slopes and low relief first; loose sediment stands in for regolith to dig and build with;
+    // dust and wind matter for landing plumes and for keeping machines and solar panels clean.
+    w: { slope: 3, relief: 3, barren: 2, sediment: 1.5, dust: 1.5, wind: 1, ts_range: 1, precip: 1 } },
   light: { label: 'Light & power', blurb: 'Low sun and long shadows for solar power, cameras and navigation.',
     w: { polar: 3, ts_min: 1, ts_mean: 1, relief: 1.5, barren: 1 } },
 };
@@ -97,7 +102,7 @@ export function targetFactors(t) {
   return {
     ts_mean: c.ts_mean, ts_range: c.ts_max - c.ts_min, ts_min: c.ts_min,
     precip: c.precip, humidity: c.humidity, frozen: t.ice,
-    pressure: c.pressure, uv: c.uv, wind: c.wind ?? null, polar: Math.abs(t.lat),
+    pressure: c.pressure, uv: c.uv, wind: c.wind ?? null, dust: c.dust ?? null, polar: Math.abs(t.lat),
     relief: t.terrain.relief, slope: t.terrain.slope,
     barren: 1, volcanic: t.volcanic, impact: t.impact, cave: t.cave ?? null,
     plutonic: t.plutonic ?? 0, sediment: t.sediment ?? 0,
@@ -155,8 +160,8 @@ export function distanceKm(a1, o1, a2, o2) {
 }
 
 /** Best cells, at least minKm apart so one region does not fill the list. */
-export function topSites(model, scores, k = 10, minKm = 400) {
-  const order = Array.from({ length: model.n }, (_, i) => i).filter((i) => Number.isFinite(scores[i]))
+export function topSites(model, scores, k = 10, minKm = 400, keep = () => true) {
+  const order = Array.from({ length: model.n }, (_, i) => i).filter((i) => Number.isFinite(scores[i]) && keep(i))
     .sort((a, b) => scores[b] - scores[a]);
   const out = [];
   for (const i of order) {
