@@ -1,6 +1,13 @@
 // Interface text in English and Ukrainian. Site and country names come translated in the data files.
 export const STRINGS = {
   en: {
+    vsSame: "This is the best known test site for this target: {name}",
+    vsFarther: "Farther in",
+    vsCloser: "Closer to the target in",
+    vsShow: "show it",
+    vsThis: "this place: {ns}",
+    vsLine: "{name}: similarity {ks}",
+    vsTitle: "Vs the best known test site",
     onlyNew: "Only little-studied places",
     newHint: "No test site within 150 km, and outside the well-known analog regions",
     studiedHint: "Inside {name}: a region already widely used as a Moon or Mars analog",
@@ -141,6 +148,13 @@ export const STRINGS = {
     },
   },
   uk: {
+    vsSame: "Це і є найкращий відомий полігон для цієї цілі: {name}",
+    vsFarther: "Далі за",
+    vsCloser: "Ближче до цілі за",
+    vsShow: "показати",
+    vsThis: "це місце: {ns}",
+    vsLine: "{name}: схожість {ks}",
+    vsTitle: "Порівняння з найкращим відомим полігоном",
     onlyNew: "Лише маловивчені місця",
     newHint: "Немає полігона ближче 150 км, і це поза відомими регіонами-аналогами",
     studiedHint: "{name}: регіон, який уже широко використовують як аналог Місяця чи Марса",

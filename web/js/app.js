@@ -383,6 +383,7 @@ function renderCompare() {
     <div class="cmp-score"><span class="score-word">${t('scoreWord')}</span><strong>${Math.round(scores[i] * 100)}</strong><span>${esc(t('scoreLine', { share: topShare(ranks[i]), purpose: lowerFirst(pName(state.purpose)) }))}</span>
       <span class="stab-line" title="${esc(t('stabilityHint'))}">${stabText(i)}</span>
       <button class="dossier-btn" id="dossier-btn">${t('dossierBtn')}</button></div>
+    ${vsKnownHtml(i)}
     <div class="cmp-grid">
       <div class="cmp-col">
         <div class="radar-box"><h3>${t('radarTitle')} <span class="info" title="${esc(t('radarHint'))}">?</span></h3>${radarSvg(model, prof, state.weights, i, { label: fShort, earthLabel: t('earth'), targetLabel: tName })}</div>
@@ -401,6 +402,7 @@ function renderCompare() {
   }
   body.innerHTML = html + '</tbody></table></div></div>';
   $('#dossier-btn').onclick = () => openDossier(i);
+  body.querySelector('.vs-show')?.addEventListener('click', (e) => select(+e.currentTarget.dataset.i));
 }
 
 const cellKey = (i) => `${model.col.lat[i]},${model.col.lon[i]}`;
@@ -497,12 +499,45 @@ worker.onmessage = (e) => {
 };
 const stabText = (i) => (stab.has(i) ? t('stability', { v: Math.round(stab.get(i) * 100) }) : t('stabilityPending'));
 
+let bestKnown = null;
+function findBestKnown() {
+  bestKnown = null;
+  for (const s of known.filter((k) => k.bodies.includes(state.body))) {
+    const i = bestCellNear(model, scores, s.lat, s.lon);
+    if (i >= 0 && (!bestKnown || scores[i] > scores[bestKnown.i])) bestKnown = { s, i };
+  }
+}
+// How the selected place compares with the best known site, factor by factor (weighted factors only).
+function vsKnownHtml(i, compact = false) {
+  if (!bestKnown) return '';
+  const { s, i: k } = bestKnown;
+  const ns = Math.round(scores[i] * 100), ks = Math.round(scores[k] * 100), d = ns - ks;
+  const head = `<span class="vs-title">${t('vsTitle')}</span>`;
+  if (i === k || distanceKm(model.col.lat[i], model.col.lon[i], s.lat, s.lon) < 60)
+    return `<div class="vs">${head}<span>${esc(t('vsSame', { name: tx(s, 'name') }))}</span></div>`;
+  const a = new Map(explain(model, i, prof, state.weights).map((r) => [r.f, r]));
+  const diffs = explain(model, k, prof, state.weights)
+    .filter((r) => r.weight > 0 && Number.isFinite(r.sim) && Number.isFinite(a.get(r.f)?.sim))
+    .map((r) => ({ f: r.f, d: (a.get(r.f).sim - r.sim) * r.weight }));
+  const list = (arr) => arr.slice(0, 3).map((x) => `<span>${esc(fShort(x.f))}</span>`).join('') || '<span>—</span>';
+  const closer = diffs.filter((x) => x.d > 0.05).sort((p, q) => q.d - p.d);
+  const farther = diffs.filter((x) => x.d < -0.05).sort((p, q) => p.d - q.d);
+  const delta = `<b class="${d > 0 ? 'up' : d < 0 ? 'down' : ''}">${d > 0 ? '+' : ''}${d}</b>`;
+  return `<div class="vs">${head}
+    <span>${esc(t('vsLine', { name: tx(s, 'name'), ks }))} → ${t('vsThis', { ns })} ${delta}</span>
+    ${compact ? '' : `<button class="vs-show" data-i="${k}">${t('vsShow')}</button>`}
+    <div class="vs-chips"><span class="vs-k">${t('vsCloser')}</span>${list(closer)}</div>
+    <div class="vs-chips farther"><span class="vs-k">${t('vsFarther')}</span>${list(farther)}</div>
+  </div>`;
+}
+
 function recompute() {
   prof = targetProfile(model, target());
   scores = scoreAll(model, prof, state.weights);
   ranks = rankAll(model, scores);
   tops = topSites(model, scores, 10, 400, state.onlyNew ? isNew : undefined);
   computeMeanSim();
+  findBestKnown();
   drawScoreLayer();
   renderCheck();
   stab = new Map();
@@ -619,7 +654,7 @@ async function openDossier(i) {
     </header>
     <section class="ds-cols">
       <div><h2>${t('earth')}</h2><p class="site-facts">${siteFacts(i)}</p>${nearbyHtml(la, lo)}${logisticsHtml(la, lo)}
-        <h2>${t('dossierWhy')}</h2><p>${esc(whyLine(i))}</p></div>
+        <h2>${t('dossierWhy')}</h2><p>${esc(whyLine(i))}</p>${vsKnownHtml(i, true)}</div>
       <div><h2>${esc(t(state.body))} · ${esc(tx(tg, 'kind'))}</h2><p><b>${esc(tx(tg, 'name'))}</b>, ${fmtCoords(tg.lat, tg.lon)}. ${esc(tx(tg, 'mission'))}.</p><p>${esc(tx(tg, 'why'))}</p></div>
     </section>
     <section class="ds-imgs">
