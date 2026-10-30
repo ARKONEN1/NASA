@@ -27,6 +27,7 @@ for (const body of ['moon', 'mars'])
   for (const t of targets[body]) {
     const prof = targetProfile(model, t);
     for (const p of Object.values(PURPOSES)) {
+      if (p.bodies && !p.bodies.includes(body)) continue;
       const w = Object.fromEntries(FACTOR_KEYS.map((f) => [f, p.w[f] || 0]));
       const scores = scoreAll(model, prof, w);
       for (const i of topSites(model, scores, 50, 250)) cand.add(i);

@@ -283,6 +283,11 @@ a { color: var(--accent); }
 .dossier .vs { display: block; border: 0; padding: 0; margin: 6pt 0 0; color: #444; }
 .dossier .vs > * { display: block; margin-bottom: 2pt; }
 .dossier .vs-chips span:not(.vs-k) { display: inline-block; margin-right: 3pt; }
+.procs { margin: -6px 0 18px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 8px; }
+.procs h3 { font-size: 13px; margin: 0 0 6px; display: flex; align-items: center; gap: 6px; }
+.procs ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; font-size: 13px; color: var(--muted); line-height: 1.45; }
+.procs b { color: var(--text); font-weight: 600; }
+.dossier .procs { border: 0; padding: 0; margin: 6pt 0 0; }
 .cmp-score .score-word { color: var(--text); font-weight: 600; margin-right: -6px; }
 
 .factors { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -413,5 +418,6 @@ a { color: var(--accent); }
   .dossier .rd-target { stroke: #2f5d8a; }
   .dossier .rd-legend .sw.target { border-color: #2f5d8a; }
   .dossier .hint { font-size: 8pt; color: #666; }
+  .dossier .info { display: none; }
   .ds-foot { margin-top: 10pt; padding-top: 5pt; border-top: 1px solid #ddd; font-size: 7.5pt; color: #777; word-break: break-all; }
 }

@@ -14,6 +14,7 @@ for (const body of ['moon', 'mars'])
   for (const t of targets[body]) {
     const prof = targetProfile(model, t);
     for (const [pid, p] of Object.entries(PURPOSES)) {
+      if (p.bodies && !p.bodies.includes(body)) continue;
       const w = Object.fromEntries(FACTOR_KEYS.map((f) => [f, p.w[f] || 0]));
       const tops = topSites(model, scoreAll(model, prof, w), 10, 400);
       const r = stabilityRunner(model, prof, w, tops);

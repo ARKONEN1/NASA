@@ -37,6 +37,7 @@
    },
    "plutonic": 1,
    "sediment": 0,
+   "salt": 0,
    "climateLiterature": {
     "ts_mean": -120,
     "ts_max": -40,
@@ -90,6 +91,7 @@
    },
    "plutonic": 1,
    "sediment": 0,
+   "salt": 0,
    "climateLiterature": {
     "ts_mean": -110,
     "ts_max": -20,
@@ -143,6 +145,7 @@
    },
    "plutonic": 1,
    "sediment": 0,
+   "salt": 0,
    "climateLiterature": {
     "ts_mean": -105,
     "ts_max": -15,
@@ -196,6 +199,7 @@
    },
    "plutonic": 0,
    "sediment": 0,
+   "salt": 0,
    "climateLiterature": {
     "ts_mean": -60,
     "ts_max": 120,
@@ -250,6 +254,7 @@
    "cave": 0.5,
    "plutonic": 0.3,
    "sediment": 0,
+   "salt": 0,
    "climateLiterature": {
     "ts_mean": -65,
     "ts_max": 110,
@@ -304,6 +309,7 @@
    "cave": 1,
    "plutonic": 0,
    "sediment": 0,
+   "salt": 0,
    "climateLiterature": {
     "ts_mean": -60,
     "ts_max": 118,
@@ -359,6 +365,7 @@
    },
    "plutonic": 0,
    "sediment": 0.7,
+   "salt": 0.4,
    "climateLiterature": {
     "ts_mean": -52,
     "ts_max": -5,
@@ -412,6 +419,7 @@
    },
    "plutonic": 0,
    "sediment": 1,
+   "salt": 0.6,
    "climateLiterature": {
     "ts_mean": -48,
     "ts_max": 0,
@@ -465,6 +473,7 @@
    },
    "plutonic": 0,
    "sediment": 1,
+   "salt": 1,
    "climateLiterature": {
     "ts_mean": -50,
     "ts_max": 5,
@@ -518,6 +527,7 @@
    },
    "plutonic": 0,
    "sediment": 0.5,
+   "salt": 0.3,
    "climateLiterature": {
     "ts_mean": -60,
     "ts_max": -10,
@@ -571,6 +581,7 @@
    },
    "plutonic": 0,
    "sediment": 0.3,
+   "salt": 0.1,
    "climateLiterature": {
     "ts_mean": -70,
     "ts_max": -25,
@@ -624,6 +635,7 @@
    },
    "plutonic": 0,
    "sediment": 0.3,
+   "salt": 0.1,
    "climateLiterature": {
     "ts_mean": -70,
     "ts_max": -25,
@@ -677,6 +689,7 @@
    },
    "plutonic": 0,
    "sediment": 0.3,
+   "salt": 0.5,
    "climateLiterature": {
     "ts_mean": -90,
     "ts_max": -30,
@@ -731,6 +744,7 @@
    "cave": 1,
    "plutonic": 0,
    "sediment": 0,
+   "salt": 0,
    "climateLiterature": {
     "ts_mean": -60,
     "ts_max": -10,
@@ -784,6 +798,7 @@
    },
    "plutonic": 0,
    "sediment": 0.2,
+   "salt": 0.1,
    "climateLiterature": {
     "ts_mean": -55,
     "ts_max": -5,

@@ -25,7 +25,7 @@ export const FEATURES = [
   'ts_mean', 'ts_max', 'ts_min', 'ts_range', 'ts_coldest',
   'precip', 'humidity', 'pressure', 'uv', 'wind', 'dust',
   'elev', 'relief', 'slope',
-  'barren', 'icecover', 'frozen', 'volcanic', 'impact', 'polar', 'cave', 'plutonic', 'sediment',
+  'barren', 'icecover', 'frozen', 'volcanic', 'impact', 'polar', 'cave', 'plutonic', 'sediment', 'salt',
   'country', 'lc_major',                        // country index, most common IGBP land-cover class
 ];
 
@@ -95,7 +95,7 @@ log(`basaltic Holocene volcanoes: ${basalt.length} of ${gvp.length - 1}`);
 // 13 pi intermediate plutonics, 14 ev evaporites, 15 nd no data, 16 ig ice and glaciers.
 const glimTxt = fs.readFileSync(path.join(RAW, 'glim', 'x', 'glim_wgs84_0point5deg.txt.asc'), 'utf8').split('\n');
 const glim = glimTxt.slice(6).filter((l) => l.trim()).map((l) => l.trim().split(/\s+/).map(Number));
-const LITH = { basalt: new Set([2, 12]), plutonic: new Set([4, 9, 13]), sediment: new Set([1, 3, 5, 6, 14]) };
+const LITH = { basalt: new Set([2, 12]), plutonic: new Set([4, 9, 13]), sediment: new Set([1, 3, 5, 6, 14]), salt: new Set([14]) };
 /** Share of land cells of a class group in the 3 x 3 GLiM cells (~1.5°) around a point. */
 function lithShare(lat, lon, group) {
   let hit = 0, n = 0;
@@ -216,7 +216,7 @@ for (let lat = -90; lat <= 90; lat += DLAT) {
       terr.elev, terr.relief, terr.slope,
       barren / land, icecover, Math.max(icecover, monthsBelow0 / 12),
       Math.max(Math.exp(-dBasalt / 60), lithShare(lat, lon, 'basalt')), impact, Math.abs(lat), Math.exp(-dCave / 50),
-      lithShare(lat, lon, 'plutonic'), lithShare(lat, lon, 'sediment'),
+      lithShare(lat, lon, 'plutonic'), lithShare(lat, lon, 'sediment'), lithShare(lat, lon, 'salt'),
       ci, lcMajor,
     ]);
   }

@@ -1,7 +1,7 @@
 import {
   FACTORS, FACTOR_KEYS, PURPOSES, buildModel, targetProfile, scoreAll, rankAll,
   topSites, nearestCell, bestCellNear, explain, distanceKm, stabilityRunner, allPurposes,
-  randomLandPoints, ranksNear, aucOf,
+  randomLandPoints, ranksNear, aucOf, purposesFor,
 } from './model.js';
 import { t, getLang, setLang, applyStatic, STRINGS } from './i18n.js';
 import { radarSvg, detailRows, logistics } from './extras.js';
@@ -167,7 +167,9 @@ function renderBodies() {
       if (state.body === b.dataset.body) return;
       state.body = b.dataset.body;
       state.targetId = targets[state.body][0].id;
+      fitPurpose();
       const changed = setTheme(state.body);
+      renderPurposes();
       renderBodies(); renderTargets(); renderWeights();
       afterFade(changed, () => { recompute(); drawKnown(); });
     };
@@ -223,10 +225,18 @@ function renderTargets() {
   }
 }
 
+/** Back to "All conditions" when the chosen purpose does not apply to the body (the search for life on the Moon). */
+function fitPurpose() {
+  if (purposesFor(state.body).includes(state.purpose)) return;
+  state.purpose = 'balanced';
+  state.weights = { ...PURPOSES.balanced.w };
+}
+
 function renderPurposes() {
   const box = $('#purposes');
   box.innerHTML = '';
-  for (const [id, p] of Object.entries(PURPOSES)) {
+  for (const id of purposesFor(state.body)) {
+    const p = PURPOSES[id];
     const b = document.createElement('button');
     b.className = 'chip';
     b.setAttribute('role', 'radio');
@@ -278,8 +288,10 @@ function computeMeanSim() {
 function whyLine(i) {
   const rows = explain(model, i, prof, state.weights).filter((r) => r.weight > 0 && Number.isFinite(r.sim));
   const lift = (r) => (r.sim - (meanSim[r.f] ?? 0)) * r.weight;
-  const good = rows.filter((r) => lift(r) > 0.05).sort((a, b) => lift(b) - lift(a)).slice(0, 3).map((r) => lowerFirst(fShort(r.f)));
-  const bad = [...rows].sort((a, b) => a.sim - b.sim)[0];
+  const goodRows = rows.filter((r) => lift(r) > 0.05).sort((a, b) => lift(b) - lift(a)).slice(0, 3);
+  const good = goodRows.map((r) => lowerFirst(fShort(r.f)));
+  // a factor already named as alike is not also named as the difference
+  const bad = rows.filter((r) => !goodRows.includes(r)).sort((a, b) => a.sim - b.sim)[0];
   return (good.length ? t('alike', { list: good.join(', ') }) : t('alikeMany')) +
     (bad && bad.sim < 0.6 ? ` · ${t('differs', { f: lowerFirst(fShort(bad.f)) })}` : '');
 }
@@ -384,6 +396,7 @@ function renderCompare() {
       <span class="stab-line" title="${esc(t('stabilityHint'))}">${stabText(i)}</span>
       <button class="dossier-btn" id="dossier-btn">${t('dossierBtn')}</button></div>
     ${vsKnownHtml(i)}
+    ${processHtml(i)}
     <div class="cmp-grid">
       <div class="cmp-col">
         <div class="radar-box"><h3>${t('radarTitle')} <span class="info" title="${esc(t('radarHint'))}">?</span></h3>${radarSvg(model, prof, state.weights, i, { label: fShort, earthLabel: t('earth'), targetLabel: tName })}</div>
@@ -499,6 +512,36 @@ worker.onmessage = (e) => {
 };
 const stabText = (i) => (stab.has(i) ? t('stability', { v: Math.round(stab.get(i) * 100) }) : t('stabilityPending'));
 
+// ---------- processes: the Earth process that reproduces one on the Moon or Mars ----------
+// Each rule needs the process on the target AND at the Earth place; the strength is the weaker of the two.
+const PROCESSES = [
+  { id: 'dust', bodies: ['mars'], s: (e, v) => Math.min(v('dust') / 0.5, e.dust / 0.3) },
+  { id: 'salt', bodies: ['mars'], s: (e, v) => Math.min(v('salt'), e.salt * 2) },
+  { id: 'lake', bodies: ['mars'], s: (e, v) => Math.min(v('sediment'), e.sediment) },
+  { id: 'permafrost', s: (e, v) => Math.min(v('frozen'), e.frozen) },
+  { id: 'volcanic', s: (e, v) => Math.min(v('volcanic'), e.volcanic) },
+  { id: 'cave', s: (e, v) => Math.min(v('cave'), e.cave) },
+  { id: 'impact', s: (e, v) => Math.min(v('impact'), e.impact) },
+  { id: 'arid', s: (e, v) => (v('precip') === 0 && e.precip < 0.3 ? Math.min(1, e.uvPct / 0.9) * 0.9 : 0) },
+  { id: 'thermal', s: (e, v) => (v('ts_range') >= 60 ? Math.min(1, e.ts_range / 45) * 0.8 : 0) },
+];
+function processesFor(i) {
+  const c = model.col, v = (f) => prof[f]?.value ?? 0;
+  const e = { dust: c.dust[i] || 0, salt: c.salt[i] || 0, sediment: c.sediment[i], frozen: c.frozen[i], volcanic: c.volcanic[i],
+    cave: c.cave[i], impact: c.impact[i], precip: c.precip[i], ts_range: c.ts_range[i], uvPct: model.pct.uv[i] || 0 };
+  return PROCESSES.filter((p) => !p.bodies || p.bodies.includes(state.body))
+    .map((p) => ({ id: p.id, s: p.s(e, v) })).filter((p) => p.s >= 0.45).sort((a, b) => b.s - a.s).slice(0, 3);
+}
+function processHtml(i) {
+  const list = processesFor(i);
+  if (!list.length) return '';
+  const P = S().processes;
+  return `<div class="procs"><h3>${t('procTitle')} <span class="info" title="${esc(t('procHint'))}">?</span></h3><ul>${list.map((p) => {
+    const [name, text] = P[p.id];
+    return `<li><b>${esc(name)}</b> ${esc(typeof text === 'string' ? text : text[state.body])}</li>`;
+  }).join('')}</ul></div>`;
+}
+
 let bestKnown = null;
 function findBestKnown() {
   bestKnown = null;
@@ -612,7 +655,7 @@ function readHash() {
   if (!targets[body]?.some((x) => x.id === id)) return;
   state.body = body;
   state.targetId = id;
-  if (PURPOSES[purpose]) {
+  if (PURPOSES[purpose] && purposesFor(body).includes(purpose)) {
     state.purpose = purpose;
     state.weights = Object.fromEntries(FACTOR_KEYS.map((f) => [f, PURPOSES[purpose].w[f] || 0]));
   }
@@ -629,6 +672,7 @@ function goTo(body, id, purpose, la, lo, zoom = 3) {
   state.targetId = id;
   state.purpose = purpose;
   state.weights = Object.fromEntries(FACTOR_KEYS.map((f) => [f, PURPOSES[purpose].w[f] || 0]));
+  fitPurpose();
   const changed = setTheme(body);
   const i = nearestCell(model, la, lo, 80);
   if (i >= 0) state.pendingCell = i;
@@ -642,7 +686,7 @@ async function openDossier(i) {
   const all = allPurposes(model, prof, i);
   const rows = explain(model, i, prof, state.weights);
   const box = $('#dossier');
-  const purposeRows = Object.keys(PURPOSES).map((p) => `<tr${p === state.purpose ? ' class="cur"' : ''}><td>${esc(pName(p))}</td><td class="num">${Math.round(all[p].score * 100)}</td><td class="num">${esc(topShare(1 - all[p].top))}</td></tr>`).join('');
+  const purposeRows = purposesFor(state.body).map((p) => `<tr${p === state.purpose ? ' class="cur"' : ''}><td>${esc(pName(p))}</td><td class="num">${Math.round(all[p].score * 100)}</td><td class="num">${esc(topShare(1 - all[p].top))}</td></tr>`).join('');
   const factorRows = rows.map((r) => `<tr${r.weight > 0 ? '' : ' class="off"'}><td>${esc(fShort(r.f))}</td><td class="num">${fmtValue(r.f, r.earth)}</td><td class="num">${fmtValue(r.f, r.target)}</td><td class="num">${Number.isFinite(r.sim) ? Math.round(r.sim * 100) + '%' : '—'}</td></tr>`).join('');
   box.innerHTML = `
     <header class="ds-head">
@@ -654,7 +698,7 @@ async function openDossier(i) {
     </header>
     <section class="ds-cols">
       <div><h2>${t('earth')}</h2><p class="site-facts">${siteFacts(i)}</p>${nearbyHtml(la, lo)}${logisticsHtml(la, lo)}
-        <h2>${t('dossierWhy')}</h2><p>${esc(whyLine(i))}</p>${vsKnownHtml(i, true)}</div>
+        <h2>${t('dossierWhy')}</h2><p>${esc(whyLine(i))}</p>${vsKnownHtml(i, true)}${processHtml(i)}</div>
       <div><h2>${esc(t(state.body))} · ${esc(tx(tg, 'kind'))}</h2><p><b>${esc(tx(tg, 'name'))}</b>, ${fmtCoords(tg.lat, tg.lon)}. ${esc(tx(tg, 'mission'))}.</p><p>${esc(tx(tg, 'why'))}</p></div>
     </section>
     <section class="ds-imgs">

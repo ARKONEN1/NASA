@@ -27,8 +27,12 @@ export const FACTORS = {
   cave:     { label: 'Lava tube nearby', short: 'Lava tube', degree: true, group: 'Surface' },
   plutonic: { label: 'Crystalline plutonic rock (like lunar highlands)', short: 'Plutonic rock', degree: true, group: 'Surface' },
   sediment: { label: 'Sedimentary rock and evaporites', short: 'Sedimentary rock', degree: true, group: 'Surface' },
+  salt:     { label: 'Salt deposits (evaporites)', short: 'Salts', degree: true, group: 'Surface' },
 };
 export const FACTOR_KEYS = Object.keys(FACTORS);
+
+/** Purposes that apply to a body (the search for life is a Mars purpose: the Moon has no habitable past to test). */
+export const purposesFor = (body) => Object.keys(PURPOSES).filter((id) => !PURPOSES[id].bodies || PURPOSES[id].bodies.includes(body));
 
 export const PURPOSES = {
   balanced: { label: 'All conditions', blurb: 'Every factor counts equally.',
@@ -47,6 +51,9 @@ export const PURPOSES = {
     // Gentle slopes and low relief first; loose sediment stands in for regolith to dig and build with;
     // dust and wind matter for landing plumes and for keeping machines and solar panels clean.
     w: { slope: 3, relief: 3, barren: 2, sediment: 1.5, dust: 1.5, wind: 1, ts_range: 1, precip: 1 } },
+  life: { label: 'Search for life', blurb: 'Hyper-arid, salty, UV-scorched ground where life is hardest and traces of it are best kept.', bodies: ['mars'],
+    // Salts and sediments keep biosignatures; extreme dryness and UV are what limit life on Mars today.
+    w: { salt: 3, precip: 2, humidity: 2, uv: 2, barren: 2, sediment: 1.5, ts_range: 1, frozen: 1, volcanic: 0.5 } },
   light: { label: 'Light & power', blurb: 'Low sun and long shadows for solar power, cameras and navigation.',
     w: { polar: 3, ts_min: 1, ts_mean: 1, relief: 1.5, barren: 1 } },
 };
@@ -105,7 +112,7 @@ export function targetFactors(t) {
     pressure: c.pressure, uv: c.uv, wind: c.wind ?? null, dust: c.dust ?? null, polar: Math.abs(t.lat),
     relief: t.terrain.relief, slope: t.terrain.slope,
     barren: 1, volcanic: t.volcanic, impact: t.impact, cave: t.cave ?? null,
-    plutonic: t.plutonic ?? 0, sediment: t.sediment ?? 0,
+    plutonic: t.plutonic ?? 0, sediment: t.sediment ?? 0, salt: t.salt ?? 0,
   };
 }
 

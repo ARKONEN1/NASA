@@ -1,6 +1,8 @@
 // Interface text in English and Ukrainian. Site and country names come translated in the data files.
 export const STRINGS = {
   en: {
+    procHint: "Earth processes at this place that reproduce processes on the Moon or Mars: the analog is a natural laboratory for them, not only a look-alike.",
+    procTitle: "Processes it shares",
     vsSame: "This is the best known test site for this target: {name}",
     vsFarther: "Farther in",
     vsCloser: "Closer to the target in",
@@ -114,6 +116,7 @@ export const STRINGS = {
     srcThumbs: 'Earth site images: ASTER GDEM shaded relief and Blue Marble Next Generation via NASA GIBS',
     unknownLand: 'Unknown territory', antarctica: 'Antarctica',
     mapAria: 'Map of Earth coloured by similarity to the selected site',
+    processes: {"dust":["Dust storms and wind-blown dust",{"mars":"Wind lifts and carries fine dust, as in the seasonal and global dust storms of Mars: a test bed for filters, solar panels and visibility."}],"salt":["Evaporation and salt deposits",{"mars":"Salts left as water dried out (sulfates, chlorides), like those of Meridiani Planum: the best place for biosignatures to survive."}],"lake":["Sediments laid down by water",{"mars":"Layered sediments of old lakes and rivers, like the Jezero delta or the layers of Mount Sharp in Gale: where to look for traces of water and life."}],"permafrost":["Permafrost and ground ice",{"mars":"Ice under a layer of soil, frost heave and patterned ground, as on the ice-rich plains of Mars.","moon":"Ice in frozen ground: how to find, drill and extract frozen water, as in the permanently shadowed craters of the south pole."}],"volcanic":["Basaltic volcanism",{"mars":"Basaltic lava fields and cones, like the volcanic plains of Mars: how lava cooled and what it preserves.","moon":"Basaltic lava fields, like the old lunar maria: lava-flow structure and the soil that forms from basalt."}],"cave":["Lava tubes","Underground lava channels, like the skylights into lava caves: natural shelter from radiation and temperature swings."],"impact":["Impact cratering","An impact crater: how an impact shatters and melts rock and brings deep material to the surface."],"arid":["Hyper-aridity and harsh UV",{"mars":"Almost no rain and strong UV break down organic matter, as in Martian soil: the limit of life and a test for biosignature instruments.","moon":"Complete dryness and strong UV: a test of how materials and instruments degrade."}],"thermal":["Thermal weathering","Sharp day–night swings crack rock and load machines, as on the surface of the Moon and Mars."]},
     groups: { Thermal: 'Heat', Water: 'Water', Sky: 'Air & sky', Terrain: 'Terrain', Surface: 'Surface' },
     units: { '°C': '°C', 'mm/day': 'mm/day', 'g/kg': 'g/kg', kPa: 'kPa', index: '', AOD: '', 'm/s': 'm/s', '°': '°', m: 'm' },
     factors: {
@@ -136,6 +139,7 @@ export const STRINGS = {
       cave: ['Lava tube nearby', 'Lava tube'],
       plutonic: ['Crystalline plutonic rock (like lunar highlands)', 'Plutonic rock'],
       sediment: ['Sedimentary rock and evaporites', 'Sedimentary rock'],
+      salt: ['Salt deposits (evaporites)', 'Salts'],
     },
     purposes: {
       balanced: ['All conditions', 'Every factor counts equally.'],
@@ -143,11 +147,14 @@ export const STRINGS = {
       habitat: ['Habitats & long stays', 'Harsh day–night cycles, thin dry air and strong UV, for living and working.'],
       ice: ['Ice & resource mining', 'Frozen ground in cold, dry places, for drills and water extraction.'],
       geology: ['Geology & sampling', 'Basaltic lava and impact craters on bare ground, for field-geology training.'],
+      life: ['Search for life', 'Hyper-arid, salty, UV-scorched ground: where life on Mars would have to survive and where its traces are best kept.'],
       landing: ['Landing & construction', 'Flat, open ground of loose bare soil, for landing pads, roads and building with local material; dust and wind matter for landing plumes.'],
       light: ['Light & power', 'Low sun and long shadows, for solar power, cameras and navigation.'],
     },
   },
   uk: {
+    procHint: "Процеси на Землі в цьому місці, які відтворюють процеси на Місяці чи Марсі: аналог стає природною лабораторією, а не лише схожим краєвидом.",
+    procTitle: "Спільні процеси",
     vsSame: "Це і є найкращий відомий полігон для цієї цілі: {name}",
     vsFarther: "Далі за",
     vsCloser: "Ближче до цілі за",
@@ -261,6 +268,7 @@ export const STRINGS = {
     srcThumbs: 'Знімки місць на Землі: тіньовий рельєф ASTER GDEM і Blue Marble Next Generation через NASA GIBS',
     unknownLand: 'Невідома територія', antarctica: 'Антарктида',
     mapAria: 'Карта Землі, розфарбована за схожістю з обраним місцем',
+    processes: {"dust":["Пилові бурі й перенесення пилу",{"mars":"Вітер піднімає й переносить дрібний пил, як у сезонних і глобальних пилових бурях Марса: полігон для фільтрів, сонячних панелей і видимості."}],"salt":["Випаровування й відкладення солей",{"mars":"Солі, що лишилися після висихання води (сульфати, хлориди), як на плато Меридіана: у них найкраще зберігаються біосигнатури."}],"lake":["Осадонакопичення у воді",{"mars":"Шари осадів давніх озер і річок, як дельта Єзеро чи шари гори Шарп у кратері Гейла: де шукати сліди води й життя."}],"permafrost":["Мерзлота й лід під ґрунтом",{"mars":"Лід під шаром ґрунту, морозне здимання й полігональний ґрунт, як на рівнинах Марса з підповерхневим льодом.","moon":"Лід у мерзлому ґрунті: як знаходити, бурити й видобувати замерзлу воду, як у вічно затінених кратерах полюса."}],"volcanic":["Базальтовий вулканізм",{"mars":"Базальтові лавові поля й конуси, як вулканічні рівнини Марса: як застигала лава і що в ній зберігається.","moon":"Базальтові лавові поля, як давні місячні моря: будова лавових потоків і ґрунт, що утворюється з базальту."}],"cave":["Лавові трубки","Підземні лавові канали, як провали в лавові печери: природне укриття від радіації й перепадів температури."],"impact":["Ударне кратероутворення","Ударний кратер: як удар дробить і переплавляє породи та виносить глибинний матеріал на поверхню."],"arid":["Гіперсухість і жорсткий УФ",{"mars":"Майже без опадів і з сильним УФ органіка руйнується, як у ґрунті Марса: межа життя й перевірка приладів пошуку біосигнатур.","moon":"Повна сухість і сильний УФ: перевірка того, як деградують матеріали й прилади."}],"thermal":["Термічне вивітрювання","Різкі перепади день–ніч руйнують породу й навантажують техніку, як на поверхні Місяця й Марса."]},
     groups: { Thermal: 'Тепло', Water: 'Вода', Sky: 'Повітря й небо', Terrain: 'Рельєф', Surface: 'Поверхня' },
     units: { '°C': '°C', 'mm/day': 'мм/добу', 'g/kg': 'г/кг', kPa: 'кПа', index: '', AOD: '', 'm/s': 'м/с', '°': '°', m: 'м' },
     factors: {
@@ -283,6 +291,7 @@ export const STRINGS = {
       cave: ['Лавова трубка поруч', 'Лавова трубка'],
       plutonic: ['Кристалічні плутонічні породи (як місячні материки)', 'Плутонічні породи'],
       sediment: ['Осадові породи й евапорити', 'Осадові породи'],
+      salt: ['Відкладення солей (евапорити)', 'Солі'],
     },
     purposes: {
       balanced: ['Усі умови', 'Усі фактори важать однаково.'],
@@ -290,6 +299,7 @@ export const STRINGS = {
       habitat: ['Житло й довгі місії', 'Жорсткі перепади день–ніч, розріджене сухе повітря й сильний УФ — для життя й роботи.'],
       ice: ['Лід і ресурси', 'Мерзлий ґрунт у холодних сухих місцях — для бурів і видобування води.'],
       geology: ['Геологія й зразки', 'Базальтова лава та імпактні кратери на голому ґрунті — для польової геології.'],
+      life: ['Пошук життя', 'Гіперсухий, солоний, випалений УФ ґрунт: там, де життя на Марсі мало б вижити і де його сліди зберігаються найкраще.'],
       landing: ['Посадка й будівництво', 'Рівна відкрита поверхня з пухкого голого ґрунту — для посадкових майданчиків, доріг і будівництва з місцевих матеріалів; пил і вітер важливі для струменя двигунів при посадці.'],
       light: ['Світло й енергія', 'Низьке Сонце й довгі тіні — для сонячних панелей, камер і навігації.'],
     },
