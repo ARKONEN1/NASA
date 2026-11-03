@@ -66,18 +66,26 @@
         <div class="map-status" id="map-status" data-i18n="loading">Loading NASA data…</div>
       </div>
 
-      <section class="panel sites-panel" aria-labelledby="top-h">
+      <section class="panel sites-panel collapsed" aria-labelledby="top-h" id="sites-panel">
         <div class="panel-head row">
           <h2 id="top-h" data-i18n="topTitle"></h2>
-          <label class="only-new"><input type="checkbox" id="only-new"> <span data-i18n="onlyNew"></span></label>
-          <span class="hint" id="top-hint"></span>
-          <div class="export">
-            <span data-i18n="exportLabel"></span>
-            <button id="export-csv">CSV</button>
-            <button id="export-geojson">GeoJSON</button>
+          <span class="fold-sum" id="sites-sum"></span>
+          <button class="fold" id="sites-fold" aria-expanded="false" aria-controls="sites-box"><span id="sites-fold-label"></span><span class="chev" aria-hidden="true"></span></button>
+        </div>
+        <div class="fold-body" id="sites-box">
+          <div class="fold-inner">
+            <div class="sites-tools">
+              <label class="only-new"><input type="checkbox" id="only-new"> <span data-i18n="onlyNew"></span></label>
+              <div class="export">
+                <span data-i18n="exportLabel"></span>
+                <button id="export-csv">CSV</button>
+                <button id="export-geojson">GeoJSON</button>
+              </div>
+              <span class="hint" id="top-hint"></span>
+            </div>
+            <ol class="sites" id="sites"></ol>
           </div>
         </div>
-        <ol class="sites" id="sites"></ol>
       </section>
 
       <section class="panel compare" aria-labelledby="cmp-h" id="compare">

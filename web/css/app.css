@@ -225,6 +225,23 @@ a { color: var(--accent); }
 .panel-head .export { margin: 0 0 0 auto; padding: 0; border: 0; }
 .hint { font-size: 12.5px; color: var(--muted); }
 
+/* ---------- folding panels ---------- */
+.sites-panel .panel-head { margin-bottom: 0; }
+.fold-sum { font-size: 13px; color: var(--muted); min-width: 0; }
+.fold { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); border-radius: 999px; padding: 4px 12px; font-size: 12.5px; cursor: pointer; white-space: nowrap; }
+.fold:hover { border-color: var(--accent); }
+.chev { width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .3s ease; }
+.fold[aria-expanded="true"] .chev { transform: translateY(2px) rotate(-135deg); }
+.fold-body { display: grid; grid-template-rows: 1fr; transition: grid-template-rows .35s ease; }
+.fold-inner { min-height: 0; overflow: hidden; }
+.collapsed .fold-body { grid-template-rows: 0fr; }
+.sites-panel:not(.collapsed) .fold-sum { display: none; }
+.sites-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; padding: 12px 0; }
+.sites-tools .hint { flex-basis: 100%; }
+.sites-tools .export { margin: 0 0 0 auto; padding: 0; border: 0; }
+.site.flash { animation: flash 1.4s ease; }
+@keyframes flash { 0%, 30% { box-shadow: inset 0 0 0 2px var(--accent), 0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent); } 100% { box-shadow: inset 0 0 0 1px var(--accent), 0 0 0 0 transparent; } }
+
 /* ---------- best places: a grid of cards under the map ---------- */
 .sites { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 @container (min-width: 980px) { .sites { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
@@ -292,6 +309,7 @@ a { color: var(--accent); }
 
 .factors { width: 100%; border-collapse: collapse; font-size: 13px; }
 .factors th { text-align: left; font-weight: 500; color: var(--muted); font-size: 11.5px; padding: 4px 6px; border-bottom: 1px solid var(--line); }
+.factors th.num { font-family: var(--font); font-size: 11.5px; }
 .factors td { padding: 4px 6px; height: 30px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .factors tr.off td { opacity: .45; }
 .factors .num { font-family: var(--mono); font-size: 12.5px; white-space: nowrap; text-align: right; }
@@ -363,17 +381,33 @@ a { color: var(--accent); }
 .stab-line { font-size: 12.5px; color: var(--good); }
 .dossier-btn { margin-left: auto; border: 1px solid var(--line); background: var(--panel-2); color: var(--text); border-radius: 6px; padding: 5px 11px; font-size: 12.5px; cursor: pointer; }
 .dossier-btn:hover { border-color: var(--accent); }
+/* Four tracks — pad · fingerprint · factors · pad — so folding the factors (to 0) and growing the pads
+   slides the fingerprint to the middle at the same width, and the change animates. */
+.cmp-bar { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.chev.side { transform: rotate(-45deg); }
+.fx-toggle[aria-expanded="false"] .chev.side { transform: rotate(135deg); }
 .cmp-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; align-items: start; }
-@container (min-width: 900px) { .cmp-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 28px; } }
+.cmp-pad { display: none; }
+.cmp-grid.fx-closed .fx { display: none; }
+@container (min-width: 900px) {
+  .cmp-grid { grid-template-columns: minmax(0, 0fr) minmax(0, 5fr) minmax(0, 6fr) minmax(0, 0fr); gap: 0; transition: grid-template-columns .45s ease; }
+  .cmp-grid.fx-closed { grid-template-columns: minmax(0, 3fr) minmax(0, 5fr) minmax(0, 0fr) minmax(0, 3fr); }
+  .cmp-pad { display: block; }
+  .cmp-grid.fx-closed .fx { display: block; }
+  .fx { overflow: hidden; }
+  .fx-inner { padding-left: 28px; min-width: 470px; transition: opacity .3s ease; }
+  .fx-closed .fx-inner { opacity: 0; }
+  .fx-closed .fx { max-height: 0; }
+}
 .cmp-col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
 .cmp-grid h3 { font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
 .info { display: inline-grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--line); font: 600 10px/1 var(--font); color: var(--muted); cursor: help; }
-.radar { width: 100%; max-width: 460px; height: auto; display: block; margin: 0 auto; }
+.radar { width: 100%; max-width: 580px; height: auto; display: block; margin: 0 auto; }
 .rd-ring { fill: none; stroke: var(--line); stroke-width: 1; }
 .rd-spoke { stroke: var(--line); stroke-width: .8; }
 .rd-earth { fill: color-mix(in srgb, var(--accent) 24%, transparent); stroke: var(--accent); stroke-width: 1.6; }
 .rd-target { fill: none; stroke: var(--target); stroke-width: 1.6; stroke-dasharray: 5 3; }
-.rd-label { font: 10.5px var(--font); fill: var(--text); }
+.rd-label { font: 12px var(--font); fill: var(--text); }
 .rd-label.off { fill: var(--faint); }
 .rd-legend { display: flex; gap: 14px; justify-content: center; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
 .rd-legend .sw { display: inline-block; width: 14px; height: 8px; margin-right: 5px; vertical-align: 0; border-radius: 2px; }

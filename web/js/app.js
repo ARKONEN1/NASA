@@ -8,7 +8,7 @@ import { radarSvg, detailRows, logistics } from './extras.js';
 import { studiedRegion } from './studied.js';
 
 const $ = (s) => document.querySelector(s);
-const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1, onlyNew: false };
+const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1, onlyNew: false, sitesOpen: false, factorsOpen: true };
 let model, targets, known, meta, places, bodymaps, detail = {}, logi, scores, ranks, prof, tops = [];
 let stab = new Map(), stabJob = 0, randomPts = null; // robustness results for the current choice
 
@@ -61,17 +61,39 @@ function ramp(x0) {
 // ---------- map ----------
 const map = L_map();
 function L_map() {
-  const m = L.map('map', { crs: L.CRS.Simple, minZoom: 0, maxZoom: 7, zoomSnap: 0, zoomDelta: 0.5, attributionControl: false });
+  const m = L.map('map', { crs: L.CRS.Simple, minZoom: 0, maxZoom: 8, zoomSnap: 0, zoomDelta: 0.5, attributionControl: false, maxBoundsViscosity: 1 });
+  // The two offline JPEGs sit under the tiles, so the map works even when NASA's tile server is unreachable.
+  m.createPane('base').style.zIndex = 150;
   // The west half overlaps the east by a hair so no seam shows at 0°.
-  L.imageOverlay('data/basemap-west.jpg', [[-90, -180], [90, 0.06]]).addTo(m);
-  L.imageOverlay('data/basemap-east.jpg', [[-90, 0], [90, 180]]).addTo(m);
-  m.setMaxBounds([[-120, -240], [120, 240]]);
-  const fit = () => m.fitBounds([[-58, -180], [84, 180]], { animate: false });
+  L.imageOverlay('data/basemap-west.jpg', [[-90, -180], [90, 0.06]], { pane: 'base' }).addTo(m);
+  L.imageOverlay('data/basemap-east.jpg', [[-90, 0], [90, 180]], { pane: 'base' }).addTo(m);
+  gibsTiles().addTo(m);
+  m.setMaxBounds([[-90, -180], [90, 180]]);
+  // Never zoom out past the frame: the world always fills the map's width.
+  const floor = () => Math.log2(m.getSize().x / 360);
+  const fit = () => { m.setMinZoom(floor()); m.fitBounds([[-58, -180], [84, 180]], { animate: false }); };
   fit();
   // Refit when the frame changes size (window resize, sidebar collapsing on phones).
   let w0 = m.getSize().x;
-  new ResizeObserver(() => { m.invalidateSize(); const w = m.getSize().x; if (Math.abs(w - w0) > 40 && tourStep < 0) fit(); w0 = w; }).observe(document.getElementById('map'));
+  new ResizeObserver(() => {
+    m.invalidateSize();
+    const w = m.getSize().x;
+    if (Math.abs(w - w0) > 40 && tourStep < 0) fit(); else m.setMinZoom(floor());
+    w0 = w;
+  }).observe(document.getElementById('map'));
   return m;
+}
+// Sharper ground when zoomed in: the same Blue Marble shaded relief from NASA GIBS as WMTS tiles (500 m, levels 0–7).
+// A GIBS tile at level z spans 288/2^z degrees, so with tileSize 288 Leaflet's zoom z is GIBS level z; from level 4 on,
+// the GIBS grid (origin 180°W, 90°N) is a whole number of tiles away from Leaflet's (origin 0°, 0°).
+function gibsTiles() {
+  const Layer = L.TileLayer.extend({
+    getTileUrl({ x, y, z }) {
+      const k = 2 ** z / 288;
+      return `https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/BlueMarble_ShadedRelief_Bathymetry/default/500m/${z}/${y + 90 * k}/${x + 180 * k}.jpeg`;
+    },
+  });
+  return new Layer('', { tileSize: 288, minZoom: 3.5, minNativeZoom: 4, maxNativeZoom: 7, maxZoom: 8, bounds: [[-90, -180], [90, 180]], noWrap: true, keepBuffer: 1 });
 }
 let scoreLayer = null, selRect = null;
 const pinLayer = L.layerGroup().addTo(map);
@@ -93,10 +115,32 @@ function drawScoreLayer() {
     img.data[k + 3] = Math.round(255 * (0.2 + 0.72 * k01));
   }
   ctx.putImageData(img, 0, 0);
-  const bounds = [[-90 - dLat / 2, -180 - dLon / 2], [90 + dLat / 2, 180 - dLon / 2]];
-  if (scoreLayer) scoreLayer.setUrl(cv.toDataURL());
-  else scoreLayer = L.imageOverlay(cv.toDataURL(), bounds, { className: 'score-layer', interactive: false }).addTo(map);
+  scoreCanvas = cv;
+  if (scoreLayer) scoreLayer.redraw();
+  else { scoreLayer = scoreTiles().addTo(map); fadeScoreLayer(); }
 }
+// The score image is cut into tiles on the fly: one big image overlay grows past what a browser will paint
+// (65 000 px wide at the closest zoom) and silently disappears.
+let scoreCanvas = null;
+map.createPane('scores').style.zIndex = 300;
+function scoreTiles() {
+  const Layer = L.GridLayer.extend({
+    createTile({ x, y, z }) {
+      const tile = document.createElement('canvas'), T = 256, deg = T / 2 ** z, { dLat, dLon } = meta.grid;
+      tile.width = tile.height = T;
+      const g = tile.getContext('2d');
+      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+      // CRS.Simple: lon = x·deg, lat = −y·deg; source pixel (0, 0) is centred on 90°N, 180°W.
+      const sx = (x * deg + 180 + dLon / 2) / dLon, sy = (90 + dLat / 2 + y * deg) / dLat;
+      g.drawImage(scoreCanvas, sx, sy, deg / dLon, deg / dLat, 0, 0, T, T);
+      return tile;
+    },
+  });
+  return new Layer({ pane: 'scores', tileSize: 256, bounds: [[-90, -180], [90, 180]], noWrap: true, className: 'score-layer' });
+}
+// The score layer is 0.5° cells: up close it thins out so the sharp ground under it shows through.
+const fadeScoreLayer = () => scoreLayer?.setOpacity(Math.max(0.6, Math.min(1, 1 - (map.getZoom() - 4) * 0.12)));
+map.on('zoomend', fadeScoreLayer);
 
 function drawPins() {
   pinLayer.clearLayers();
@@ -104,7 +148,9 @@ function drawPins() {
     L.marker([model.col.lat[i], model.col.lon[i]], {
       icon: L.divIcon({ className: '', html: `<div class="pin${i === state.selected ? ' active' : ''}">${k + 1}</div>`, iconSize: [24, 24], iconAnchor: [12, 12] }),
       keyboard: false,
-    }).on('click', () => select(i))
+      // where pins touch, a better rank stays on top, and the selected pin above all
+      zIndexOffset: (i === state.selected ? 1000 : 0) + (tops.length - k) * 10,
+    }).on('click', () => select(i, { fromMap: true }))
       .bindTooltip(`${k + 1}. ${esc(countryOf(i))} · ${fmtCoords(model.col.lat[i], model.col.lon[i])}`, { direction: 'top', offset: [0, -12] })
       .addTo(pinLayer);
   });
@@ -115,7 +161,7 @@ function drawKnown() {
   for (const s of known.filter((s) => s.bodies.includes(state.body))) {
     L.marker([s.lat, s.lon], { icon: L.divIcon({ className: '', html: '<div class="known-pin"></div>', iconSize: [12, 12], iconAnchor: [6, 6] }), keyboard: false })
       .bindTooltip(`${t('knownPrefix')}: ${esc(tx(s, 'name'))}`, { direction: 'top', offset: [0, -6] })
-      .on('click', () => { const i = bestCellNear(model, scores, s.lat, s.lon); if (i >= 0) select(i); })
+      .on('click', () => { const i = bestCellNear(model, scores, s.lat, s.lon); if (i >= 0) select(i, { fromMap: true }); })
       .addTo(knownLayer);
   }
 }
@@ -128,14 +174,14 @@ function drawCaves() {
   for (const [name, uk, la, lo] of places.caves) {
     L.marker([la, lo], { icon: L.divIcon({ className: '', html: '<div class="cave-pin"></div>', iconSize: [12, 12], iconAnchor: [6, 6] }), keyboard: false })
       .bindTooltip(`${t('cavePrefix')}: ${esc(getLang() === 'uk' ? uk : name)}`, { direction: 'top', offset: [0, -6] })
-      .on('click', () => { const i = nearestCell(model, la, lo, 80); if (i >= 0) select(i); })
+      .on('click', () => { const i = nearestCell(model, la, lo, 80); if (i >= 0) select(i, { fromMap: true }); })
       .addTo(caveLayer);
   }
 }
 $('#show-caves').addEventListener('change', (e) => (e.target.checked ? caveLayer.addTo(map) : caveLayer.remove()));
 map.on('click', (e) => {
   const i = nearestCell(model, e.latlng.lat, e.latlng.lng, 60);
-  if (i >= 0) select(i, { pan: false });
+  if (i >= 0) select(i, { pan: false, fromMap: true });
 });
 
 // ---------- controls ----------
@@ -190,11 +236,31 @@ function sitePos(tg) {
   return { inset: false, left: ((tg.lon + 180) / 360) * 100, top: ((90 - tg.lat) / 180) * 100 };
 }
 function pickTarget(id) { state.targetId = id; renderTargets(); renderWeights(); recompute(); }
+// Sites closer than a marker's width (Gale and InSight on Mars) are pushed apart a little, so both numbers stay readable.
+function spreadMarkers(list) {
+  const W = 300, H = 150, D = 19; // map size in px (sidebar width), marker size + a gap
+  const pos = new Map(list.map((tg) => { const p = sitePos(tg); return [tg.id, { ...p, x: (p.left / 100) * (p.inset ? H : W), y: (p.top / 100) * H }]; }));
+  const ps = [...pos.values()];
+  for (let it = 0; it < 30; it++) {
+    for (let a = 0; a < ps.length; a++) for (let b = a + 1; b < ps.length; b++) {
+      const p = ps[a], q = ps[b];
+      if (p.inset !== q.inset) continue;
+      let dx = q.x - p.x, dy = q.y - p.y, d = Math.hypot(dx, dy);
+      if (d >= D) continue;
+      if (d < 0.01) { dx = 0; dy = 1; d = 1; }
+      const push = (D - d) / 2;
+      p.x -= (dx / d) * push; p.y -= (dy / d) * push; q.x += (dx / d) * push; q.y += (dy / d) * push;
+    }
+  }
+  for (const p of ps) { p.left = (p.x / (p.inset ? H : W)) * 100; p.top = (p.y / H) * 100; }
+  return pos;
+}
 function renderSiteMap() {
   const box = $('#site-map'), list = targets[state.body];
   const hasInset = list.some((tg) => sitePos(tg).inset);
+  const spread = spreadMarkers(list);
   const marker = (tg, k) => {
-    const p = sitePos(tg);
+    const p = spread.get(tg.id);
     return `<button class="smk" style="left:${p.left}%;top:${p.top}%" data-id="${tg.id}" aria-pressed="${tg.id === state.targetId}" title="${esc(tx(tg, 'name'))}" aria-label="${esc(tx(tg, 'name'))}">${k + 1}</button>`;
   };
   const inset = list.filter((tg) => sitePos(tg).inset);
@@ -330,7 +396,24 @@ function renderSites() {
     ol.append(li);
   });
   $('#top-hint').textContent = t('topHint', { n: tops.filter(isNew).length, total: tops.length });
+  $('#sites-sum').textContent = tops.length ? t('sitesSum', { total: tops.length, n: tops.filter(isNew).length, best: countryOf(tops[0]), score: Math.round(scores[tops[0]] * 100) }) : '';
+  renderSitesFold();
 }
+
+// The list starts folded; a click on the map unfolds it and lights up the card of that place.
+function renderSitesFold() {
+  $('#sites-panel').classList.toggle('collapsed', !state.sitesOpen);
+  $('#sites-fold').setAttribute('aria-expanded', String(state.sitesOpen));
+  $('#sites-fold-label').textContent = t(state.sitesOpen ? 'foldHide' : 'foldShow');
+}
+function openSites(i) {
+  state.sitesOpen = true;
+  renderSitesFold();
+  const card = [...document.querySelectorAll('#sites .site')][tops.indexOf(i)];
+  if (!card) return;
+  card.classList.remove('flash'); void card.offsetWidth; card.classList.add('flash');
+}
+$('#sites-fold').onclick = () => { state.sitesOpen = !state.sitesOpen; renderSitesFold(); };
 
 function gibs(layer, la, lo, km = 150, px = 320) {
   const dLa = km / 111.2 / 2, dLo = dLa / Math.max(0.15, Math.cos(la * Math.PI / 180));
@@ -397,12 +480,15 @@ function renderCompare() {
       <button class="dossier-btn" id="dossier-btn">${t('dossierBtn')}</button></div>
     ${vsKnownHtml(i)}
     ${processHtml(i)}
-    <div class="cmp-grid">
+    <div class="cmp-bar"><button class="fold fx-toggle" id="fx-toggle" aria-expanded="${state.factorsOpen}" aria-controls="fx-col"><span>${t(state.factorsOpen ? 'fxHide' : 'fxShow')}</span><span class="chev side" aria-hidden="true"></span></button></div>
+    <div class="cmp-grid${state.factorsOpen ? '' : ' fx-closed'}">
+      <span class="cmp-pad"></span>
       <div class="cmp-col">
         <div class="radar-box"><h3>${t('radarTitle')} <span class="info" title="${esc(t('radarHint'))}">?</span></h3>${radarSvg(model, prof, state.weights, i, { label: fShort, earthLabel: t('earth'), targetLabel: tName })}</div>
         <div class="detail-box"><h3>${t('detailTitle')} <span class="info" title="${esc(t('detailHint'))}">?</span></h3>${detailHtml(i, tg)}</div>
       </div>
-      <div class="cmp-col">
+      <div class="cmp-col fx" id="fx-col"><div class="fx-inner">
+        <h3>${t('factorsTitle')}</h3>
     <table class="factors"><thead><tr><th>${t('colFactor')}</th><th class="num">${t('colEarth')}</th><th class="num">${esc(t(state.body))}</th><th class="match">${t('colMatch')}</th></tr></thead><tbody>`;
   let group = '';
   for (const r of explain(model, i, prof, state.weights)) {
@@ -413,9 +499,19 @@ function renderCompare() {
       <td>${esc(fShort(r.f))}</td><td class="num">${fmtValue(r.f, r.earth)}</td><td class="num">${fmtValue(r.f, r.target)}${beyond}</td>
       <td class="match">${meter(r.sim)}</td></tr>`;
   }
-  body.innerHTML = html + '</tbody></table></div></div>';
+  body.innerHTML = html + '</tbody></table></div></div><span class="cmp-pad"></span></div>';
+  $('#fx-toggle').onclick = toggleFactors;
   $('#dossier-btn').onclick = () => openDossier(i);
   body.querySelector('.vs-show')?.addEventListener('click', (e) => select(+e.currentTarget.dataset.i));
+}
+
+// The factor table folds away to the right; the fingerprint slides to the middle (no re-render, so it animates).
+function toggleFactors() {
+  state.factorsOpen = !state.factorsOpen;
+  const btn = $('#fx-toggle');
+  $('.cmp-grid').classList.toggle('fx-closed', !state.factorsOpen);
+  btn.setAttribute('aria-expanded', String(state.factorsOpen));
+  btn.firstElementChild.textContent = t(state.factorsOpen ? 'fxHide' : 'fxShow');
 }
 
 const cellKey = (i) => `${model.col.lat[i]},${model.col.lon[i]}`;
@@ -483,7 +579,7 @@ function renderSources() {
     .map((s) => `<li>${esc(s)}</li>`).join('');
 }
 
-function select(i, { pan = true } = {}) {
+function select(i, { pan = true, fromMap = false } = {}) {
   state.selected = i;
   const la = model.col.lat[i], lo = model.col.lon[i], { dLat, dLon } = meta.grid;
   if (selRect) selRect.remove();
@@ -491,6 +587,7 @@ function select(i, { pan = true } = {}) {
   // Pan only when the place is out of view, so the whole-world view stays filled edge to edge.
   if (pan && !map.getBounds().pad(-0.08).contains([la, lo])) map.panTo([la, lo]);
   drawPins(); renderSites(); renderCompare();
+  if (fromMap) openSites(i);
   writeHash();
   if (stabAsked.size) runStability([i]);
 }
