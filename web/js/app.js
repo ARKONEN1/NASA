@@ -8,7 +8,7 @@ import { radarSvg, detailRows, logistics } from './extras.js';
 import { studiedRegion } from './studied.js';
 
 const $ = (s) => document.querySelector(s);
-const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1, onlyNew: false, sitesOpen: false, factorsOpen: true };
+const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1, onlyNew: false, sitesOpen: false, factorsOpen: false };
 let model, targets, known, meta, places, bodymaps, detail = {}, logi, scores, ranks, prof, tops = [];
 let stab = new Map(), stabJob = 0, randomPts = null; // robustness results for the current choice
 
