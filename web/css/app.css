@@ -178,6 +178,12 @@ a { color: var(--accent); }
   background: rgba(10, 13, 20, .82); padding: 6px 10px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px;
 }
 .map-toggles label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+.life-pin { width: 11px; height: 11px; background: #9fd36a; border: 1.5px solid #fff; border-radius: 2px; transform: rotate(45deg); box-shadow: 0 0 0 1px rgba(0,0,0,.5); }
+.life-pin.sm { width: 8px; height: 8px; display: inline-block; margin: 0 2px; }
+.life-tip { max-width: 280px; white-space: normal; min-width: 220px; }
+.procs .ref { font-size: 11.5px; color: var(--faint); font-style: normal; }
+.procs .hint { margin: 0; }
+a.method-link { text-decoration: none; display: inline-flex; align-items: center; }
 .cave-pin { width: 12px; height: 12px; background: #7fd1c7; clip-path: polygon(50% 0, 100% 100%, 0 100%); }
 .known-pin.sm, .cave-pin.sm { width: 10px; height: 10px; display: inline-block; }
 .known-pin.sm { border-width: 1.5px; }

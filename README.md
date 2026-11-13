@@ -16,10 +16,13 @@ The interface is in English and Ukrainian (switch in the header).
 4. Each place gets a card: land cover, height, climate in one line, the nearest named volcano, impact crater and lava tube, a factor-by-factor comparison, and shaded relief of both places side by side.
 5. Each place also gets a **fingerprint** (radar of all factors on Earth's scale, target vs place), **terrain up close** (20 km window, 0.48 km baseline: ESA Copernicus DEM on Earth, LOLA on the Moon, MOLA on Mars), **robustness** (see below) and **logistics** (nearest town and airport).
    The card also gives a **verdict**: where the analogy is strong and where it breaks down (factor matches in percent), what no place on Earth can give (gravity, air pressure and radiation dose, Earth vs the Moon or Mars), and the three purposes this place is best suited to rehearse.
+   **Life at the limits:** a map layer and a card block with 23 places where peer-reviewed studies document extremophiles or ancient traces of life, each with its reference (`data/curated/life-sites.json`). Hand-compiled, shown for context, not part of the score.
 6. **Dossier (PDF):** one printable page per candidate, with score, robustness, logistics, images, fingerprint, fit for every purpose and all factors.
 7. **Discoveries:** a five-step guided tour of the main findings. Every view has a shareable link, e.g. `#/mars/arsia/geology/25.5,40`.
 8. The top 50 places can be downloaded as CSV or GeoJSON, with every factor value, its match, robustness, logistics and terrain up close.
 9. **Does the method work?** Established NASA/ESA field sites are never shown to the model. The app reports where they rank for the current choice; a random place would sit at 50 %. The app also shows which factors make the known sites stand out and which do not. Where they give no lift, those sites were picked for other reasons and cannot vouch for that factor.
+
+**Written report** in English and Ukrainian: `web/docs/en.html` and `web/docs/uk.html`, linked from the header of the app ("Report").
 
 ## Method
 

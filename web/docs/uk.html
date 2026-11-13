@@ -2,6 +2,7 @@
 <html lang="uk">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Атлас аналогів — документація</title>
 <style>
   @page { size: A4; margin: 18mm 17mm 20mm 17mm; }
@@ -58,9 +59,22 @@
   .keynums div { border: 1px solid var(--line); border-radius: 4pt; padding: 7pt 9pt; break-inside: avoid; }
   .keynums b { display: block; font-size: 17pt; color: var(--accent); }
   .keynums span { font-size: 9pt; color: var(--muted); line-height: 1.35; display: block; }
+  @media screen {
+    body { max-width: 900px; margin: 0 auto; padding: 0 16px 48px; font-size: 16px; }
+    html { font-size: 12pt; }
+    .cover { height: auto; gap: 24px; padding-top: 24px; } .cover .top { margin-top: 12px; }
+    .cover h1 { font-size: 26pt; } section.chapter { margin-top: 36px; }
+    p { text-align: left; } table { display: block; overflow-x: auto; }
+    .docbar { display: flex; gap: 14px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .docbar a { color: var(--blue); text-decoration: none; } .docbar a:hover { text-decoration: underline; }
+  }
+  @media screen and (max-width: 640px) { .pair, .keynums, .cover .meta { grid-template-columns: 1fr; } figure.half img, figure.third img { max-width: 100%; } }
+  @media print { .docbar { display: none; } }
 </style>
 </head>
 <body>
+<nav class="docbar"><a href="../">← До застосунку</a><a href="en.html">English</a><a href="https://github.com/ARKONEN1/NASA">GitHub</a></nav>
+
 
 <!-- ================= Cover ================= -->
 <div class="cover">
@@ -93,6 +107,7 @@
     <li><span>8</span><span>Обмеження</span></li>
     <li><span>9</span><span>Як відтворити результати</span></li>
     <li><span>10</span><span>Джерела даних</span></li>
+    <li><span>11</span><span>Що додано після жовтня</span></li>
   </ol>
 </section>
 
@@ -447,6 +462,23 @@ node tools/robustness.mjs   # стійкість усіх 90 списків (т�
     <tr><td>LRO Diviner; Curiosity REMS; Perseverance MEDA; Phoenix MET; InSight APSS; Mars Climate Database</td><td>Клімат поверхні цілей на Місяці й Марсі (округлені значення)</td></tr>
   </table>
   <figure><img src="img/23-method.jpg" alt=""><figcaption>Рис. 22. Розділ «Як це працює» в самому застосунку: короткий опис методу, обмежень і джерел.</figcaption></figure>
+
+</section>
+
+
+<section class="chapter">
+  <h2>11. Що додано після жовтня</h2>
+  <p>Розділи 1–10 описують жовтневу версію, і цифри в них стосуються саме її. Відтоді застосунок доповнено:</p>
+  <ul>
+    <li><b>Факторів стало 20.</b> Додано пил у повітрі (оптична товщина грубого аерозолю, MERRA-2 через NASA POWER) і три типи порід з літологічної карти GLiM: плутонічні (як місячні нагір'я), осадові та сольові відклади.</li>
+    <li><b>Цілей використання стало 8.</b> Додано «Посадка й будівництво» та «Пошук життя» (лише для Марса).</li>
+    <li><b>Клімат Місяця й Марса тепер обчислюється з даних</b> для кожної цілі: LRO Diviner Global Cumulative Products і Mars Climate Database v6.2, а не округлені значення з публікацій.</li>
+    <li><b>Перевірка методу через AUC</b> — імовірність, що відомий полігон стоїть вище за випадкове місце суходолу. На початкових 19 полігонах AUC від 0,60 до 0,80, на розширеному списку з 31 полігона — 0,56–0,77. Найслабший випадок той самий: Місяць, «Житло».</li>
+    <li><b>Позначка «вивчений регіон»</b> для місць усередині регіонів, які завдання називає добре відомими (Атакама, Антарктида, Ісландія, Гаваї, Мохаве й Долина Смерті, острів Девон), і фільтр «Лише маловивчені місця».</li>
+    <li><b>Порівняння з найкращим відомим полігоном</b> і блок <b>«Спільні процеси»</b>: пилові бурі, сольові відклади, мерзлота, базальтовий вулканізм, лавові трубки, ударні кратери, термічне вивітрювання.</li>
+    <li><b>Вердикт у картці місця:</b> де аналогія сильна, де вона не працює, чого не дасть жодне місце на Землі (сила тяжіння, тиск, доза радіації в числах) і що тут варто відпрацювати.</li>
+    <li><b>«Життя на межі»:</b> шар карти й блок у картці з 23 місцями, де в рецензованих дослідженнях описано екстремофілів або давні сліди життя (Юнгай, Ріо-Тінто, Даллол, долина Юніверсіті, шахта Кідд-Крік, печера Мовіле та інші), з посиланням на статтю біля кожного. Список складено вручну, координати приблизні, на оцінку схожості він не впливає.</li>
+  </ul>
   <p class="muted" style="margin-top:16pt">Незалежний студентський проєкт для NASA Space Apps Challenge 2026. Не є офіційним продуктом NASA й не схвалений NASA. Автор — А. Широков.</p>
 </section>
 

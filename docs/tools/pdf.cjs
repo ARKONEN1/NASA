@@ -2,13 +2,13 @@
 // Usage: node docs/tools/pdf.cjs <puppeteer-core dir> <browser exe>
 const path = require('path');
 const puppeteer = require(path.join(process.argv[2], 'node_modules', 'puppeteer-core'));
-const DOCS = path.join(__dirname, '..');
+const DOCS = path.join(__dirname, '..', '..', 'web', 'docs');
 (async () => {
   const browser = await puppeteer.launch({ executablePath: process.argv[3], headless: true });
   const page = await browser.newPage();
-  await page.goto(require('url').pathToFileURL(path.join(DOCS, 'documentation-uk.html')).href, { waitUntil: 'networkidle0' });
+  await page.goto(require('url').pathToFileURL(path.join(DOCS, 'uk.html')).href, { waitUntil: 'networkidle0' });
   await page.pdf({
-    path: path.join(DOCS, 'Analog-Atlas-dokumentatsiia.pdf'),
+    path: path.join(__dirname, '..', 'Analog-Atlas-dokumentatsiia.pdf'),
     format: 'A4', printBackground: true, preferCSSPageSize: true,
     displayHeaderFooter: true,
     headerTemplate: '<div></div>',

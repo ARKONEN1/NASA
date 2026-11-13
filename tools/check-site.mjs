@@ -9,7 +9,7 @@ const REQUIRED = [
   'index.html', 'css/app.css', 'js/app.js', 'js/model.js', 'js/i18n.js', 'js/extras.js', 'js/stability-worker.js',
   'vendor/leaflet/leaflet.js', 'vendor/leaflet/leaflet.css',
   'data/earth-meta.json', 'data/earth-cells.bin', 'data/targets.json', 'data/known-analogs.json',
-  'data/places.json', 'data/bodymaps.json', 'data/detail.json', 'data/logistics.json', 'data/basemap-west.jpg', 'data/basemap-east.jpg',
+  'data/places.json', 'data/bodymaps.json', 'data/detail.json', 'data/logistics.json', 'data/life-sites.json', 'docs/en.html', 'docs/uk.html', 'data/basemap-west.jpg', 'data/basemap-east.jpg',
   'data/map-moon.png', 'data/map-mars.png', 'data/map-moon-south.png',
 ];
 const LIMIT = 25 * 1024 * 1024;

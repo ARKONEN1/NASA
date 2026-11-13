@@ -9,7 +9,7 @@ import { studiedRegion } from './studied.js';
 
 const $ = (s) => document.querySelector(s);
 const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1, onlyNew: false, sitesOpen: false, factorsOpen: false };
-let model, targets, known, meta, places, bodymaps, detail = {}, logi, scores, ranks, prof, tops = [];
+let model, targets, known, meta, places, life = [], bodymaps, detail = {}, logi, scores, ranks, prof, tops = [];
 let stab = new Map(), stabJob = 0, randomPts = null; // robustness results for the current choice
 
 // ---------- text helpers ----------
@@ -179,6 +179,29 @@ function drawCaves() {
   }
 }
 $('#show-caves').addEventListener('change', (e) => (e.target.checked ? caveLayer.addTo(map) : caveLayer.remove()));
+// Places where life at the limits (or its ancient traces) is documented: hand-compiled, shown but not scored.
+const lifeLayer = L.layerGroup();
+const lifeName = (x) => (getLang() === 'uk' ? x.uk : x.name);
+const lifeText = (x) => (getLang() === 'uk' ? x.ukText : x.en);
+function drawLife() {
+  lifeLayer.clearLayers();
+  for (const x of life) {
+    L.marker([x.lat, x.lon], { icon: L.divIcon({ className: '', html: '<div class="life-pin"></div>', iconSize: [12, 12], iconAnchor: [6, 6] }), keyboard: false })
+      .bindTooltip(`<b>${esc(lifeName(x))}</b> · ${esc(S().lifeKinds[x.kind])}<br>${esc(lifeText(x))}<br><i>${esc(x.ref)}</i>`, { direction: 'top', offset: [0, -6], className: 'life-tip' })
+      .on('click', () => { const i = nearestCell(model, x.lat, x.lon, 80); if (i >= 0) select(i, { fromMap: true }); })
+      .addTo(lifeLayer);
+  }
+}
+$('#show-life').addEventListener('change', (e) => (e.target.checked ? lifeLayer.addTo(map) : lifeLayer.remove()));
+function lifeNear(la, lo, maxKm = 300) {
+  return life.map((x) => ({ x, d: distanceKm(la, lo, x.lat, x.lon) })).filter((r) => r.d <= maxKm).sort((a, b) => a.d - b.d);
+}
+function lifeHtml(la, lo) {
+  const list = lifeNear(la, lo).slice(0, 2);
+  return `<div class="procs life"><h3>${t('lifeTitle')} <span class="info" title="${esc(t('lifeHint'))}">?</span></h3>${list.length
+    ? `<ul>${list.map(({ x, d }) => `<li><b>${esc(lifeName(x))}</b>, ${Math.round(d)} ${t('km')} · ${esc(S().lifeKinds[x.kind])}. ${esc(lifeText(x))} <i class="ref">${esc(x.ref)}</i></li>`).join('')}</ul>`
+    : `<p class="hint">${t('lifeNone')}</p>`}</div>`;
+}
 map.on('click', (e) => {
   const i = nearestCell(model, e.latlng.lat, e.latlng.lng, 60);
   if (i >= 0) select(i, { pan: false, fromMap: true });
@@ -188,6 +211,7 @@ map.on('click', (e) => {
 const target = () => targets[state.body].find((x) => x.id === state.targetId);
 
 function renderLang() {
+  $("#docs-link").href = `docs/${getLang()}.html`;
   document.querySelectorAll('.lang button').forEach((b) => {
     b.setAttribute('aria-checked', String(b.dataset.lang === getLang()));
     b.onclick = () => { if (b.dataset.lang !== getLang()) { setLang(b.dataset.lang); renderAll(); } };
@@ -481,6 +505,7 @@ function renderCompare() {
     ${verdictHtml(i)}
     ${vsKnownHtml(i)}
     ${processHtml(i)}
+    ${lifeHtml(la, lo)}
     <div class="cmp-bar"><button class="fold fx-toggle" id="fx-toggle" aria-expanded="${state.factorsOpen}" aria-controls="fx-col"><span>${t(state.factorsOpen ? 'fxHide' : 'fxShow')}</span><span class="chev side" aria-hidden="true"></span></button></div>
     <div class="cmp-grid${state.factorsOpen ? '' : ' fx-closed'}">
       <span class="cmp-pad"></span>
@@ -576,7 +601,7 @@ function renderCheck() {
 }
 
 function renderSources() {
-  $('#sources').innerHTML = [...Object.values(meta.sources), targets.sources.moon, targets.sources.mars, t('srcClimateBodies'), t('srcThumbs')]
+  $('#sources').innerHTML = [...Object.values(meta.sources), targets.sources.moon, targets.sources.mars, t('srcClimateBodies'), t('srcThumbs'), t('srcLife')]
     .map((s) => `<li>${esc(s)}</li>`).join('');
 }
 
@@ -742,6 +767,8 @@ function exportRows() {
     const lg = logistics(logi, model.col.lat[i], model.col.lon[i]);
     row.nearest_town = lg.town?.p[0] ?? ''; row.nearest_town_km = lg.town ? Math.round(lg.town.d) : '';
     row.nearest_airport = lg.airport ? `${lg.airport.p[0]}${lg.airport.p[2] ? ' (' + lg.airport.p[2] + ')' : ''}` : ''; row.nearest_airport_km = lg.airport ? Math.round(lg.airport.d) : '';
+    const lf = lifeNear(model.col.lat[i], model.col.lon[i])[0];
+    row.life_site = lf?.x.name ?? ''; row.life_site_km = lf ? Math.round(lf.d) : ''; row.life_site_ref = lf?.x.ref ?? '';
     const d = detail[cellKey(i)];
     ['slope_median_deg', 'slope_p90_deg', 'slopes_over_10deg_pct', 'slopes_over_20deg_pct', 'relief_20km_m'].forEach((k, j) => { row[k] = d ? d[j] : ''; });
     for (const r of explain(model, i, prof, state.weights)) {
@@ -772,7 +799,7 @@ $('#export-geojson').onclick = () => {
 
 /** Re-render every text after a language switch (scores stay as they are). */
 function renderAll() {
-  applyStatic(); renderLang(); renderBodies(); renderTargets(); renderPurposes(); renderWeights(); renderSources(); drawKnown(); drawCaves();
+  applyStatic(); renderLang(); renderBodies(); renderTargets(); renderPurposes(); renderWeights(); renderSources(); drawKnown(); drawCaves(); drawLife();
   if (scores) { renderCheck(); drawPins(); renderSites(); renderCompare(); }
   if (tourStep >= 0) showTour(tourStep, false);
 }
@@ -831,7 +858,7 @@ async function openDossier(i) {
     </header>
     <section class="ds-cols">
       <div><h2>${t('earth')}</h2><p class="site-facts">${siteFacts(i)}</p>${nearbyHtml(la, lo)}${logisticsHtml(la, lo)}
-        <h2>${t('dossierWhy')}</h2><p>${esc(whyLine(i))}</p>${vsKnownHtml(i, true)}${processHtml(i)}${verdictHtml(i)}</div>
+        <h2>${t('dossierWhy')}</h2><p>${esc(whyLine(i))}</p>${vsKnownHtml(i, true)}${processHtml(i)}${lifeHtml(la, lo)}${verdictHtml(i)}</div>
       <div><h2>${esc(t(state.body))} · ${esc(tx(tg, 'kind'))}</h2><p><b>${esc(tx(tg, 'name'))}</b>, ${fmtCoords(tg.lat, tg.lon)}. ${esc(tx(tg, 'mission'))}.</p><p>${esc(tx(tg, 'why'))}</p></div>
     </section>
     <section class="ds-imgs">
@@ -898,7 +925,7 @@ methodDlg.addEventListener('click', (e) => { if (e.target === methodDlg) methodD
 applyStatic(); renderLang();
 (async () => {
   try {
-    const [m, bin, tg, kn, pl, bm, lg, dt] = await Promise.all([
+    const [m, bin, tg, kn, pl, bm, lg, dt, lf] = await Promise.all([
       fetch('data/earth-meta.json').then((r) => r.json()),
       fetch('data/earth-cells.bin').then((r) => r.arrayBuffer()),
       fetch('data/targets.json').then((r) => r.json()),
@@ -907,8 +934,10 @@ applyStatic(); renderLang();
       fetch('data/bodymaps.json').then((r) => r.json()),
       fetch('data/logistics.json').then((r) => r.json()),
       fetch('data/detail.json').then((r) => (r.ok ? r.json() : {})).catch(() => ({})),
+      fetch('data/life-sites.json').then((r) => (r.ok ? r.json() : { sites: [] })).catch(() => ({ sites: [] })),
     ]);
     logi = lg;
+    life = lf.sites;
     detail = dt;
     places = pl;
     bodymaps = bm;

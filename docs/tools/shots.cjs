@@ -3,7 +3,7 @@
 const path = require('path');
 const fs = require('fs');
 const puppeteer = require(path.join(process.argv[2], 'node_modules', 'puppeteer-core'));
-const OUT = path.join(__dirname, '..', 'img');
+const OUT = path.join(__dirname, '..', '..', 'web', 'docs', 'img');
 fs.mkdirSync(OUT, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -134,6 +134,6 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
   await shot('23-method', '.modal-box');
   await page.evaluate(() => document.querySelector('#method').close());
 
-  fs.writeFileSync(path.join(__dirname, '..', 'img', 'results.json'), JSON.stringify(results, null, 1));
+  fs.writeFileSync(path.join(__dirname, '..', '..', 'web', 'docs', 'img', 'results.json'), JSON.stringify(results, null, 1));
   await browser.close();
 })();

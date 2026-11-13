@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Analog Atlas — report</title>
+<style>
+  @page { size: A4; margin: 18mm 17mm 20mm 17mm; }
+  :root { --ink: #1b1f27; --muted: #5a6272; --line: #d9dde5; --accent: #c9761a; --soft: #f5f2ec; --blue: #2f5d8a; }
+  * { box-sizing: border-box; }
+  html { font-size: 10.5pt; }
+  body { margin: 0; color: var(--ink); font-family: "Segoe UI", "Noto Sans", Arial, sans-serif; line-height: 1.5; }
+  h1, h2, h3 { line-height: 1.25; margin: 0; }
+  h2 { font-size: 17pt; margin: 0 0 10pt; padding-bottom: 5pt; border-bottom: 2px solid var(--accent); break-after: avoid; }
+  h3 { font-size: 12.5pt; margin: 16pt 0 6pt; break-after: avoid; color: var(--blue); }
+  p { margin: 0 0 7pt; text-align: justify; hyphens: auto; }
+  ul, ol { margin: 0 0 8pt; padding-left: 16pt; }
+  li { margin-bottom: 3pt; }
+  b, strong { font-weight: 600; }
+  section.chapter { break-before: page; }
+  figure { margin: 10pt 0 12pt; break-inside: avoid; text-align: center; }
+  figure img { max-width: 100%; max-height: 118mm; width: auto; border: 1px solid var(--line); border-radius: 4pt; }
+  .pair figure img { max-height: 128mm; }
+  figure.tall img { max-height: 150mm; }
+  figure.half img { max-width: 62%; }
+  figure.third img { max-width: 46%; }
+  figcaption { font-size: 9pt; color: var(--muted); margin-top: 4pt; text-align: center; }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 10pt; align-items: start; }
+  .pair figure { margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0 10pt; font-size: 9.3pt; break-inside: avoid; }
+  th, td { border: 1px solid var(--line); padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { background: #eef1f5; font-weight: 600; }
+  td.n, th.n { text-align: right; white-space: nowrap; }
+  .box { background: var(--soft); border-left: 3pt solid var(--accent); padding: 8pt 11pt; margin: 8pt 0 10pt; break-inside: avoid; }
+  .box p:last-child, .box ul:last-child { margin-bottom: 0; }
+  .formula { font-family: "Cambria Math", "Times New Roman", serif; font-size: 12pt; text-align: center; margin: 8pt 0; }
+  .muted { color: var(--muted); }
+  code { font-family: Consolas, "Courier New", monospace; font-size: 9.3pt; background: #eef1f5; padding: 0 3pt; border-radius: 2pt; }
+  pre { font-family: Consolas, monospace; font-size: 9pt; background: #eef1f5; padding: 7pt 9pt; border-radius: 3pt; margin: 4pt 0 9pt; white-space: pre-wrap; }
+  .tag { display: inline-block; font-size: 8.5pt; padding: 0 5pt; border-radius: 3pt; background: #fbe6c8; color: #8a4d00; font-weight: 600; }
+  .tag.known { background: #e6e9ee; color: #4b5260; }
+
+  /* cover */
+  .cover { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover .top { margin-top: 30mm; }
+  .cover .kicker { font-size: 10.5pt; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+  .cover h1 { font-size: 34pt; margin: 8pt 0 4pt; }
+  .cover .en { font-size: 14pt; color: var(--muted); margin-bottom: 18pt; }
+  .cover .sub { font-size: 14pt; max-width: 150mm; line-height: 1.4; }
+  .cover img { width: 100%; border-radius: 5pt; border: 1px solid var(--line); margin-top: 14pt; }
+  .cover .meta { font-size: 10.5pt; color: var(--muted); border-top: 1px solid var(--line); padding-top: 8pt; display: grid; grid-template-columns: 1fr 1fr; gap: 2pt 20pt; }
+  .cover .meta b { color: var(--ink); }
+
+  /* contents */
+  .toc ol { list-style: none; padding: 0; font-size: 11pt; }
+  .toc li { display: flex; gap: 8pt; padding: 4pt 0; border-bottom: 1px dotted var(--line); }
+  .toc li span:first-child { width: 22pt; color: var(--accent); font-weight: 600; }
+  .keynums { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8pt; margin: 10pt 0; }
+  .keynums div { border: 1px solid var(--line); border-radius: 4pt; padding: 7pt 9pt; break-inside: avoid; }
+  .keynums b { display: block; font-size: 17pt; color: var(--accent); }
+  .keynums span { font-size: 9pt; color: var(--muted); line-height: 1.35; display: block; }
+  @media screen {
+    body { max-width: 900px; margin: 0 auto; padding: 0 16px 48px; font-size: 16px; }
+    html { font-size: 12pt; }
+    .cover { height: auto; gap: 24px; padding-top: 24px; } .cover .top { margin-top: 12px; }
+    .cover h1 { font-size: 26pt; } section.chapter { margin-top: 36px; }
+    p { text-align: left; } table { display: block; overflow-x: auto; }
+    .docbar { display: flex; gap: 14px; flex-wrap: wrap; padding: 12px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
+    .docbar a { color: var(--blue); text-decoration: none; } .docbar a:hover { text-decoration: underline; }
+  }
+  @media screen and (max-width: 640px) { .pair, .keynums, .cover .meta { grid-template-columns: 1fr; } figure.half img, figure.third img { max-width: 100%; } }
+  @media print { .docbar { display: none; } }
+</style>
+</head>
+<body>
+<nav class="docbar"><a href="../">← Back to the app</a><a href="uk.html">Українською</a><a href="https://github.com/ARKONEN1/NASA">GitHub</a></nav>
+<!-- ================= Cover ================= -->
+<div class="cover">
+  <div class="top">
+    <div class="kicker">NASA Space Apps Challenge 2026</div>
+    <h1>Analog Atlas</h1>
+    <div class="en">Атлас аналогів</div>
+    <div class="sub">A search for places on Earth that resemble future Moon bases and Mars landing sites, built on open NASA data. This report explains what the app shows, how it works, how we check the result and why the answers come out the way they do.</div>
+    <img src="img/01-overview.jpg" alt="">
+  </div>
+  <div class="meta">
+    <div>Author: <b>A. Shyrokov</b> (ARKONEN)</div>
+    <div>Version: October 2026, with a November 2026 update (section 11)</div>
+    <div>Challenge: <b>Identify Earth Locations that Analog the Permanent Moon Base Locations and Mars</b></div>
+    <div>Code: github.com/ARKONEN1/NASA</div>
+  </div>
+</div>
+
+<!-- ================= Contents ================= -->
+<section class="chapter toc">
+  <h2>Contents</h2>
+  <ol>
+    <li><span>1</span><span>In brief</span></li>
+    <li><span>2</span><span>Why this is needed</span></li>
+    <li><span>3</span><span>What is where on the screen</span></li>
+    <li><span>4</span><span>How to use it, step by step</span></li>
+    <li><span>5</span><span>How it works: the method</span></li>
+    <li><span>6</span><span>How we check that the method works</span></li>
+    <li><span>7</span><span>How we read the results and why they come out this way</span></li>
+    <li><span>8</span><span>Limits</span></li>
+    <li><span>9</span><span>How to reproduce the results</span></li>
+    <li><span>10</span><span>Data sources</span></li>
+    <li><span>11</span><span>What has been added since October</span></li>
+  </ol>
+  <p class="muted" style="margin-top:10pt">The screenshots were taken in the Ukrainian version of the interface. The app itself switches between English and Ukrainian in the header.</p>
+</section>
+
+<section class="chapter">
+  <h2>1. In brief</h2>
+  <p>Before a rover, a drill or a crew goes to the Moon or Mars, NASA rehearses hardware and methods on Earth, at so-called <b>terrestrial analogs</b>: the Atacama Desert, Devon Island, Death Valley. Few such places are known, and most were chosen from expert experience. The hackathon challenge is to find and describe <b>new</b> analogs from open data.</p>
+  <p>We built a web app, Analog Atlas. The user picks a place on the Moon or Mars (for example, the Artemis base area near the lunar south pole) and what they want to rehearse there. The app compares every piece of Earth's land with that place (about 71 thousand cells of ~55 km) on 16 measured conditions. The result is a similarity map, the ten best places with an explanation of what is alike and what is not, a factor-by-factor comparison, close-up terrain from ESA Copernicus data, logistics, and a printable dossier for each candidate.</p>
+  <div class="keynums">
+    <div><b>71,070</b><span>cells of Earth's land, each described by 16 factors from open data</span></div>
+    <div><b>15</b><span>target sites: 6 on the Moon and 9 on Mars</span></div>
+    <div><b>64–98%</b><span>median rank of known NASA/ESA test sites that the model never saw (a random place: 50%)</span></div>
+    <div><b>93%</b><span>of places in the 90 top-10 lists stay in the best 1% of land when the weights change at random by ±50%</span></div>
+    <div><b>1,525</b><span>candidates with close-up terrain from the ESA Copernicus DEM at a 0.48 km baseline</span></div>
+    <div><b>5</b><span>findings in the built-in tour, among them the new candidates Harrat Khaybar and Peary Land</span></div>
+  </div>
+  <p>The main check is honest and blind: the 19 sites that NASA and ESA already use were <b>not shown</b> to the model. If the method makes sense, they should rise to the top by themselves. They do: for Jezero crater on Mars, for example, the model puts the Atacama Desert first without being told. Where the known sites do not confirm the method, we show that and explain it (section 6).</p>
+</section>
+
+<!-- ================= 2 ================= -->
+<section class="chapter">
+  <h2>2. Why this is needed</h2>
+  <h3>What a terrestrial analog is</h3>
+  <p>A terrestrial analog is a place on Earth where conditions resemble, in some respect, those of another body. Equipment, rover routes, drilling, habitat modules and crew work can be tested there before it costs billions of dollars in space. Examples: Apollo astronauts learned geology at Meteor Crater in Arizona and on Iceland's volcanoes; Mars rovers are tested in the Atacama; the Haughton-Mars Project works in the Arctic crater Haughton.</p>
+  <h3>What the challenge asks for</h3>
+  <p>The challenge text has two key verbs: <b>identify</b> and <b>characterize</b>. Landing and base sites are chosen by terrain, geology, environment and resources. So an analog should be sought not by how the relief looks but by the whole set of conditions: cold, temperature swings, dryness, thin air, ultraviolet, bare ground without plants, ice, volcanic rock, impact craters, caves. The word <b>new</b> matters too: the Atacama and Death Valley are already known, and the value lies in places not yet in use. One more requirement is data from <b>NASA and other space agencies</b>. Besides NASA data we use the <b>Copernicus DEM</b> elevation model of the European Space Agency (ESA).</p>
+  <h3>Why you cannot simply find a second Moon</h3>
+  <p>No place on Earth is literally like the Moon or Mars. Earth has no nights at −180 °C, no 0.7 kPa air and nowhere without any precipitation at all. Gravity, vacuum and cosmic radiation cannot be reproduced on Earth in any way. Every analog is therefore <b>partial</b>: a place can be excellent for testing a rover (similar terrain and ground) and poor for testing a habitat (mild climate). That is why the app asks for a <b>purpose</b>: what exactly is being rehearsed.</p>
+  <div class="box">
+    <p><b>What the app gives a mission team:</b></p>
+    <ul>
+      <li>a map of all of Earth's land coloured by similarity to the chosen site;</li>
+      <li>a list of the best candidates tagged "new" or "known";</li>
+      <li>a description of each candidate: land cover, elevation, climate, the nearest volcano, crater and lava tube;</li>
+      <li>a factor-by-factor comparison: what matches, what does not, and where the target lies beyond Earth's range altogether;</li>
+      <li>a robustness check of each candidate against the choice of weights;</li>
+      <li>close-up terrain at the same 0.48 km baseline on Earth, the Moon and Mars;</li>
+      <li>logistics: the nearest town and airport;</li>
+      <li>a site dossier, one printable page per candidate;</li>
+      <li>export of the 50 best places as CSV or GeoJSON for further work in a GIS.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= 3 ================= -->
+<section class="chapter">
+  <h2>3. What is where on the screen</h2>
+  <figure><img src="img/01-overview.jpg" alt=""><figcaption>Fig. 1. The main screen (Ukrainian version). Target: the rim of Shackleton crater near the lunar south pole; purpose: "All conditions".</figcaption></figure>
+  <table>
+    <tr><th style="width:28%">Area</th><th>What is there</th></tr>
+    <tr><td>Header</td><td>The title, the <b>Discoveries</b> button (a tour of the main results), the "How it works" button (method and hints), a link to this report, and the EN / УКР language switch.</td></tr>
+    <tr><td>Left panel, step 1</td><td><b>Destination</b>: Moon or Mars.</td></tr>
+    <tr><td>Left panel, step 2</td><td><b>Site</b>: a relief map of the Moon or Mars with numbered targets, and a list of those targets with thumbnails.</td></tr>
+    <tr><td>Left panel, step 3</td><td><b>What will you test</b>: the purposes; below them the factor weights can be tuned by hand.</td></tr>
+    <tr><td>"How to read this map"</td><td>Three sentences on how to use the app, inside "How it works".</td></tr>
+    <tr><td>Map of Earth</td><td>Similarity of every land cell to the chosen target; numbered best places; white circles for known analogs; triangles for lava tubes and diamonds for life-at-the-limits sites (both switched on separately).</td></tr>
+    <tr><td>"Best Earth analogs"</td><td>The ten best places, at least 400 km apart, with a score, a "new / known" tag and a short explanation. Below the list: CSV / GeoJSON export.</td></tr>
+    <tr><td>"Side by side"</td><td>The target and the chosen place on Earth together: description, logistics, relief, satellite image, score with robustness, the "Dossier (PDF)" button, the factor fingerprint, close-up terrain and the table of all factors.</td></tr>
+    <tr><td>"Does the method work?"</td><td>Where the known NASA/ESA sites rank for the current choice, and which factors they confirm.</td></tr>
+    <tr><td>"How it works"</td><td>A short account of the method and its limits, and the list of data sources.</td></tr>
+  </table>
+  <figure><img src="img/02-intro.jpg" alt=""><figcaption>Fig. 2. The hint for a first visit: three steps instead of a manual.</figcaption></figure>
+</section>
+
+<!-- ================= 4 ================= -->
+<section class="chapter">
+  <h2>4. How to use it, step by step</h2>
+  <h3>4.1. Language</h3>
+  <p>The <b>EN / УКР</b> switch in the top right corner changes the whole interface, the names of places on the Moon and Mars, and the names of known sites and countries. The choice is remembered in the browser.</p>
+  <figure><img src="img/22-header.jpg" alt=""><figcaption>Fig. 3. The header: the "Discoveries" and "How it works" buttons and the language switch.</figcaption></figure>
+
+  <h3>4.2. Steps 1–2: pick a site on the Moon or Mars</h3>
+  <p>The maps are built from the same data as the calculation: the Moon from the LRO LOLA laser altimeter, Mars from MGS MOLA. A marker's number on the map matches its number in the list; a click on a marker or a list row selects the target, and the map of Earth is recomputed at once.</p>
+  <p>The three Artemis candidate areas lie within 170 km of the lunar south pole. On an ordinary map they would merge into a strip along the bottom edge, so they are shown separately on a <b>polar map</b> of 440 × 440 km (stereographic projection from the 240 m LOLA polar elevation model). On the global map the polar strip is marked with a dashed line.</p>
+  <div class="pair">
+    <figure><img src="img/03-site-map-moon.jpg" alt=""><figcaption>Fig. 4. The Moon: the global map (sites 4–6) and the polar inset with the Artemis areas (1–3).</figcaption></figure>
+    <figure><img src="img/10-site-map-mars.jpg" alt=""><figcaption>Fig. 5. Mars: nine targets, from Jezero and Gale craters to the icy plains and the caves of Arsia Mons.</figcaption></figure>
+  </div>
+
+  <h3>4.3. Step 3: what will you test</h3>
+  <p>The purpose decides which factors matter more. Rovers have to be tested on similar terrain, a habitat module in similar cold and dry, thin air. A short line under the buttons says what each purpose looks at. Under "Fine-tune factor weights" every factor can be strengthened or switched off by hand (from 0 to 3). Factors that make no sense for a target are marked "n/a" (wind on the Moon, for example, which has no atmosphere).</p>
+  <div class="pair">
+    <figure><img src="img/04-purposes.jpg" alt=""><figcaption>Fig. 6. The purposes (six in the October version).</figcaption></figure>
+    <figure><img src="img/05-weights.jpg" alt=""><figcaption>Fig. 7. Tuning the weights by hand.</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h3>4.4. The map of Earth</h3>
+  <p>Colour shows how alike a cell is to the target. Only the best 40% of land is coloured, from dark violet to pale yellow (most alike). The numbered orange circles are the ten best places. The white circles are known NASA/ESA sites, so it is clear at once where they stand relative to what was found. The switches at the bottom right add the lava-tube and cave layer. The map can be zoomed, and a click on any cell opens its comparison with the target.</p>
+  <figure><img src="img/06-earth-map-shackleton.jpg" alt=""><figcaption>Fig. 8. Similarity of Earth's land to the rim of Shackleton crater ("All conditions"). The brightest areas are the highlands of Central Asia, the Andean puna and the polar deserts.</figcaption></figure>
+
+  <h3>4.5. The list of best analogs</h3>
+<div class="pair">
+    <figure><img src="img/07-sites-shackleton.jpg" alt=""><figcaption>Fig. 9. The ten best places for the Shackleton rim.</figcaption></figure>
+    <div>  <p>Each row gives the country, the coordinates, a score <b>out of 100</b> and the share of land the place beats ("top 0.1%" means that less than 0.1% of Earth's land area is more alike). The tag <span class="tag">new</span> means there is no known site within 150 km; <span class="tag known">known</span> means there is one. The line "Alike in …" names the factors on which the place most outperforms an ordinary land cell, and "differs in …" names the worst match.</p></div>
+  </div>
+</section>
+
+<section>
+  <h3>4.6. The "Side by side" comparison</h3>
+  <p>On the left is the target: the kind of site, its coordinates, shaded relief of 150 × 150 km and why the site matters. On the right is the place on Earth: country, coordinates, a one-line description (land cover, elevation, mean, night and day temperature, yearly precipitation), the nearest volcano, impact crater and lava tube with names and distances, shaded relief at the same scale (ASTER GDEM) and a satellite image (Blue Marble).</p>
+  <p>Below is the table of all factors: the value on Earth, the value at the target and a match bar. The note <i>"lower / higher than anywhere on Earth"</i> means the target condition lies beyond Earth's range. The best possible match is then the most extreme place Earth has (see 5.3). Grey rows are factors not counted for the chosen purpose.</p>
+  <figure class="tall"><img src="img/13-compare-jezero.jpg" alt=""><figcaption>Fig. 10. Jezero crater (Mars) next to its best Earth analog, the Atacama Desert in Chile.</figcaption></figure>
+
+  <h3>4.7. Exporting the results</h3>
+  <p>The <b>CSV</b> and <b>GeoJSON</b> buttons under the list save the 50 best places (at least 250 km apart) for the current choice. For each place the file holds the rank, coordinates, country, score, share of land, "new / known" status, land cover and elevation, as well as the value of every factor and its match with the target. GeoJSON opens in QGIS, ArcGIS or Google Earth. The file also carries robustness, the nearest town and airport and the close-up terrain figures.</p>
+
+  <h3>4.8. Fingerprint and terrain up close</h3>
+  <p>The <b>fingerprint</b> is a radar chart of all factors. Each spoke is a factor on Earth's own scale: the lowest value on Earth at the centre, the highest at the edge. The dashed outline is the Moon or Mars target, the filled shape is the place on Earth. The more the shapes coincide, the more alike the places are; grey labels are not counted for the chosen purpose. The fingerprint shows the similarity in a second, without reading the table.</p>
+  <p><b>Terrain up close</b> compares places at the scale of a landing ellipse: a 20 × 20 km window sampled every 0.48 km. It shows the median slope, the threshold of the steepest 10% of slopes, the share of slopes over 10° and 20°, and the height range. For Earth the data are the <b>ESA Copernicus DEM</b>, for the Moon LRO LOLA (240–474 m), for Mars MGS MOLA (463 m).</p>
+  <figure><img src="img/24-radar-detail-arsia.jpg" alt=""><figcaption>Fig. 11. Fingerprint and terrain up close: the caves of Arsia Mons (Mars) and Harrat Khaybar (Saudi Arabia).</figcaption></figure>
+
+  <h3>4.9. Robustness and logistics</h3>
+  <p>Under the score of each place stands its <b>robustness</b>: in how many of 60 re-scorings with randomly changed weights the place stays in the best 1% of land (see 6.5). Green means 80% or more, orange less. The place card also has <b>logistics</b>: the nearest town and airport with distances (Natural Earth). For a field expedition that is the first practical question.</p>
+
+  <h3>4.10. The site dossier</h3>
+  <p>The <b>"Dossier (PDF)"</b> button in the "Side by side" block opens a one-page printout per candidate: score, robustness, status, description and logistics, three images (the target, relief and a satellite image of Earth), the fingerprint, fitness for every purpose, terrain up close and the table of all factors. In the print dialog choose "Save as PDF". Such a dossier can be handed straight to an expedition team.</p>
+  <figure class="tall"><img src="img/25-dossier.jpg" alt=""><figcaption>Fig. 12. The dossier of Harrat Khaybar as an Earth analog of the Arsia Mons caves.</figcaption></figure>
+
+  <h3>4.11. Discoveries and links</h3>
+  <p>The <b>Discoveries</b> button starts a five-step tour of the main results (section 7). Each step switches the target and purpose by itself, opens the right place on the map and explains what we found. This mode is handy for showing the project to a jury.</p>
+  <p>The page address always holds the current choice, for example <code>#/mars/arsia/geology/25.5,40</code>. Such a link can be shared: it opens the same choice and the same place.</p>
+  <figure><img src="img/26-tour.jpg" alt=""><figcaption>Fig. 13. The "Discoveries" tour, step 2: the new candidate Harrat Khaybar.</figcaption></figure>
+</section>
+
+<!-- ================= 5 ================= -->
+<section class="chapter">
+  <h2>5. How it works: the method</h2>
+  <h3>5.1. Data</h3>
+  <p>All the data are open. For Earth we took the global NASA POWER grid (0.5° × 0.625°, about 55 km) and kept only cells where at least a quarter of the area is land. That left 71,070 cells. Sixteen factors were measured for each:</p>
+  <table>
+    <tr><th style="width:24%">Factor</th><th style="width:38%">Earth (every cell)</th><th>Moon / Mars (every target)</th></tr>
+    <tr><td>Relief, slope</td><td>NOAA ETOPO1, 3.7 km spacing</td><td>LRO LOLA (240 m near the pole), MGS MOLA 128 px/° (~460 m)</td></tr>
+    <tr><td>Terrain up close (for information)</td><td>ESA Copernicus DEM (240 m level), 0.48 km baseline</td><td>LRO LOLA 240 m / LDEM_64 474 m; MGS MOLA 463 m</td></tr>
+    <tr><td>Logistics (for information)</td><td>Natural Earth: 7,342 populated places, 893 airports</td><td>—</td></tr>
+    <tr><td>Ground temperature: mean, day–night swing, night</td><td>NASA POWER, climatology 2001–2025 (MERRA-2)</td><td>LRO Diviner; Curiosity REMS, Perseverance MEDA, Phoenix, InSight, Mars Climate Database (rounded)</td></tr>
+    <tr><td>Precipitation, air moisture, pressure, UV, wind</td><td>NASA POWER (UV from CERES)</td><td>Values from the literature: no precipitation, almost no water vapour, pressure 0–0.9 kPa</td></tr>
+    <tr><td>Bare ground, ice</td><td>MODIS IGBP Land Cover 2024 via NASA GIBS</td><td>The surface is always bare</td></tr>
+    <tr><td>Frozen ground</td><td>Share of months below 0 °C, or share of ice</td><td>0–1 from known ground ice</td></tr>
+    <tr><td>Basaltic volcanism</td><td>Distance to Holocene basaltic volcanoes (Smithsonian GVP)</td><td>0–1 from the site geology</td></tr>
+    <tr><td>Impact crater</td><td>Distance to exposed confirmed craters (Earth Impact Database)</td><td>0–1 from the site geology</td></tr>
+    <tr><td>Low sun</td><td>Latitude</td><td>Latitude</td></tr>
+    <tr><td>Lava tube</td><td>Distance to 22 well-documented lava tubes</td><td>Cave targets only</td></tr>
+  </table>
+
+  <h3>5.2. The same terrain measures on three worlds</h3>
+  <p>Terrain can be compared fairly only when it is measured the same way. So for every place on every body we take elevations on the same grid of 15 × 15 points, 3.7 km apart, that is a 52 × 52 km square in a local projection around the centre. From these elevations we compute two quantities: <b>relief</b> (the standard deviation of elevation, m) and <b>typical slope</b> (the median gradient at a 3.7 km baseline, degrees). A stability check: when we moved Mars from the coarse MOLA model at 16 px/° to the detailed one at 128 px/°, the values barely changed (Gale crater: 1245 m → 1283 m). The measure does not depend on incidental details of the data.</p>
+
+  <h3>5.3. Earth's own scale</h3>
+  <p>This is the central idea of the method. Comparing absolute values is pointless: against the 0.7 kPa of Mars, every place on Earth (50–105 kPa) is equally bad. So we turn every factor into a <b>percentile among Earth's land</b>, weighted by cell area: 0 is the lowest value on Earth, 1 the highest. The target value is put on the same scale. If it lies beyond Earth's range it becomes 0 or 1, pointing to the most extreme end Earth has.</p>
+  <div class="box"><p><b>Example.</b> Pressure in Jezero crater is 0.7 kPa, lower than anywhere on Earth, so the target gets percentile 0. The Earth places closest to it are those with the lowest pressure among land, the highest plateaus. In the Atacama Desert at 2959 m the pressure is 71.9 kPa: not Martian pressure, but already within the lowest few percent of Earth's distribution. The pressure match there is therefore high.</p></div>
+
+  <h3>5.4. The score</h3>
+  <p>For each factor <i>f</i> the similarity of an Earth cell to the target is one minus the difference of percentiles. For degree factors (bare ground, frozen ground, volcanism, crater, lava tube), which already lie on a 0–1 scale, the difference is taken directly:</p>
+  <div class="formula">s<sub>f</sub> = 1 − | P<sub>Earth</sub>(f) − P<sub>target</sub>(f) |</div>
+  <p>The final score is the weighted mean over all factors with the weights <i>w<sub>f</sub></i> of the chosen purpose, multiplied by 100:</p>
+  <div class="formula">S = 100 · Σ w<sub>f</sub> · s<sub>f</sub> / Σ w<sub>f</sub></div>
+  <p>Separately we compute what share of Earth's land area the place beats on this score (that is the "top 0.1%"). The best places are picked greedily, at least 400 km apart, so that one plateau does not fill the whole top ten.</p>
+</section>
+
+<section>
+  <h3>5.5. Purposes and weights</h3>
+  <table>
+    <tr><th style="width:23%">Purpose</th><th>Most important factors (weight)</th><th style="width:31%">Why</th></tr>
+    <tr><td>All conditions</td><td>All factors with weight 1</td><td>Overall similarity</td></tr>
+    <tr><td>Rovers &amp; spacewalks</td><td>Relief 3, slope 3, bare ground 3; crater, volcanism, precipitation 1</td><td>Wheels and boots care about the surface and the gradients</td></tr>
+    <tr><td>Habitats &amp; long stays</td><td>Mean and night temperature, day–night swing, pressure 2 each; UV and lava tube 1.5; moisture, precipitation, bare ground, wind 1</td><td>A habitat cares about the thermal regime and the air; a tube is natural shelter</td></tr>
+    <tr><td>Ice &amp; resource mining</td><td>Frozen ground 3, bare ground 3; mean and night temperature 2; moisture, precipitation, relief 1</td><td>Ice under bare regolith in a cold, dry place</td></tr>
+    <tr><td>Geology &amp; sampling</td><td>Volcanism 3, crater 3; bare ground and lava tube 2; relief, slope, precipitation 1</td><td>Field geology: rocks and impact structures</td></tr>
+    <tr><td>Light &amp; power</td><td>Low sun 3, relief 1.5; mean and night temperature, bare ground 1</td><td>Long shadows and a low sun, as at the lunar poles</td></tr>
+  </table>
+
+  <h3>5.6. How the "Alike" and "differs" lines are made</h3>
+  <p>If we simply named the factors with the highest match, the explanations would be empty. "No volcano nearby", for instance, is true for most of Earth. So for each factor we compute the mean match of an ordinary land cell and name the factors where the place <b>exceeds that mean</b> the most (taking the weight into account). "Alike in impact crater, bare ground, day–night swing" then says exactly what makes the place special. "Differs" is the factor with the worst match, if it is below 60%.</p>
+
+  <h3>5.7. Terrain up close: how it is computed</h3>
+  <p>The global grid is coarse (~55 km), while landing and rover routes depend on slopes at a scale of hundreds of metres. So for each candidate we compute a separate set of figures in a 20 × 20 km window sampled every <b>0.48 km</b>. That is the finest scale available on all three bodies: the ESA Copernicus DEM on Earth (240 m level), LOLA 240 m near the lunar pole and LDEM_64 (474 m) at other latitudes, MOLA 463 m on Mars.</p>
+  <p>The Copernicus DEM cannot be read straight from a browser, so the figures are precomputed for 1,525 candidates: every place that appears in any top-50 list for any target and purpose, plus the known sites. These figures are <b>not part of the score</b>: they help choose a specific patch inside the region that was found.</p>
+</section>
+
+<!-- ================= 6 ================= -->
+<section class="chapter">
+  <h2>6. How we check that the method works</h2>
+  <h3>6.1. A blind check on known sites</h3>
+  <p>We compiled a list of 19 places that NASA and ESA already use as analogs: the Atacama Desert, the McMurdo Dry Valleys, Haughton crater on Devon Island, the Mars Desert Research Station in Utah, Death Valley, Río Tinto, the Qaidam Basin, the Pilbara, Dallol, Svalbard, Mauna Kea, the Black Point lava flow, Meteor Crater, Craters of the Moon in Idaho, Sudbury, the Ries crater, Lanzarote, the Icelandic highlands and Mistastin Lake. These places are <b>not used</b> in computing the score. They serve only to see where the model puts them.</p>
+  <p>For each site we take the best cell within 60 km and look at its rank among all land. A random place would rank at 50% on average. If the median of the known sites is clearly higher, the score does capture what people chose analogs for.</p>
+  <figure><img src="img/14-check-jezero.jpg" alt=""><figcaption>Fig. 14. The "Does the method work?" block for Jezero crater: the median rank of the 14 Mars sites is top 22% (the 78th percentile); 6 of 14 fall in the best 10% of land.</figcaption></figure>
+
+  <h3>6.2. Results for all targets</h3>
+  <p>Median rank of the known sites (percentile of land; 50% = a random place), averaged over all targets of the body:</p>
+  <table>
+    <tr><th>Purpose</th><th class="n">Moon (11 sites)</th><th class="n">Mars (14 sites)</th></tr>
+    <tr><td>All conditions</td><td class="n">79.9%</td><td class="n">80.8%</td></tr>
+    <tr><td>Rovers &amp; spacewalks</td><td class="n">89.8%</td><td class="n">89.2%</td></tr>
+    <tr><td>Habitats &amp; long stays</td><td class="n">64.3%</td><td class="n">78.4%</td></tr>
+    <tr><td>Ice &amp; resource mining</td><td class="n">77.9%</td><td class="n">86.1%</td></tr>
+    <tr><td>Geology &amp; sampling</td><td class="n">98.2%*</td><td class="n">90.0%*</td></tr>
+    <tr><td>Light &amp; power</td><td class="n">76.0%</td><td class="n">77.7%</td></tr>
+  </table>
+  <p class="muted" style="font-size:9pt">* The check for "Geology" is partly circular: some sites (Meteor Crater, Sudbury, Ries, Haughton crater) are famous for the very craters and volcanoes listed in the catalogues the model uses. We do not treat these numbers as proof and give them only for completeness.</p>
+  <p>All values are above 50%, and in most scenarios they are 77–90%. The weakest case is "Habitats" for the Moon (64%). We worked out why.</p>
+</section>
+
+<section>
+  <h3>6.3. Diagnosis: what the known sites actually confirm</h3>
+  <p>Under the check results the app shows two lists: the factors on which the known sites <b>stand out</b> from ordinary land, and those on which they are <b>no better</b> than it. For "Habitats" on the Moon the picture is this: the sites stand out in bare ground, temperatures, dry air and pressure, but are <b>no better than ordinary land</b> on the most lunar traits of all: the huge day–night swing, the absence of precipitation and the strong UV. Besides, some of the sites lie in a mild climate: Lanzarote (top 84%), Mauna Kea (67%), the Ries crater (59%).</p>
+  <figure><img src="img/20-check-shackleton-habitat.jpg" alt=""><figcaption>Fig. 15. Shackleton rim, "Habitats": the median rank is top 36%. The lists at the bottom show the reason.</figcaption></figure>
+  <div class="box"><p><b>Conclusion.</b> The known lunar sites (Hawaii, Arizona, Ries, Sudbury, Iceland) were chosen for <b>geology and terrain</b>, not climate. They can therefore neither confirm nor refute the climate part of the method for the Moon: there is no reference for a lunar climate among them. For Mars targets the same purpose gives 78.4%, because the Mars sites (Atacama, the Dry Valleys, Devon) were chosen precisely for cold and dryness. This is not an error of the score but a limit of what can be checked. The app says so plainly under the lists.</p></div>
+
+  <h3>6.4. A correction that the check produced</h3>
+  <p>Analysing the check exposed one real mistake. For "Ice &amp; resource mining" at Arcadia Planitia (Mars) the Antarctic ice sheet won at first, while the app itself wrote "differs in bare ground". But on Mars the ice lies <b>under bare regolith</b>, a metre or two down. Physically the closest analog is the permafrost of polar deserts, not a glacier. We raised the weight of bare ground in this purpose from 1 to 3 and checked the result:</p>
+  <table>
+    <tr><th>Weight of "bare ground" in the "Ice" purpose</th><th class="n">1 (before)</th><th class="n">3 (after)</th></tr>
+    <tr><td>Haughton crater, Devon Island (known site)</td><td class="n">top 7.0%</td><td class="n">top &lt;0.1%</td></tr>
+    <tr><td>McMurdo Dry Valleys (known site)</td><td class="n">top 6.7%</td><td class="n">top 5.6%</td></tr>
+    <tr><td>First place</td><td>Antarctic ice sheet</td><td>Peary Land, north Greenland</td></tr>
+    <tr><td>Median of known sites, Mars / Moon</td><td class="n">78.6% / 73.7%</td><td class="n">86.1% / 77.9%</td></tr>
+  </table>
+  <p>This is the correction of a physical mistake, not a fit to the answer: we changed one weight, with a stated reason, and the improvement shows on independent sites.</p>
+
+  <h3>6.5. Robustness: does the result depend on our weights</h3>
+  <p>The factor weights are chosen by a person, so a jury will naturally ask: what if the weights were a little different? We answer numerically. For each candidate the app recomputes the whole map 60 times. Each time every weight is multiplied by a random number from 0.5 to 1.5, and the target's position on Earth's scale is shifted by ±0.05: that is the uncertainty of the rounded climate values for the Moon and Mars. Robustness is the share of re-scorings in which the place stays in the best 1% of land. The random generator is seeded, so the result is reproducible.</p>
+  <table>
+    <tr><th>Measure (all 15 targets × 6 purposes = 90 lists, 900 places)</th><th class="n">Value</th></tr>
+    <tr><td>Places with robustness ≥ 90%</td><td class="n">93.4%</td></tr>
+    <tr><td>Places with robustness 100%</td><td class="n">75.6%</td></tr>
+    <tr><td>First place of a list with robustness ≥ 90%</td><td class="n">89 of 90</td></tr>
+    <tr><td>Weakest purposes (share of places ≥ 90%)</td><td class="n">"Light" 84%, "Ice" 87%</td></tr>
+  </table>
+  <p>The results are driven by the data, not by the exact choice of weights. The lower robustness for "Light" and "Ice" is to be expected: polar deserts are very alike, and their order in the list changes easily. The regions themselves stay the same.</p>
+</section>
+
+<!-- ================= 7 ================= -->
+<section class="chapter">
+  <h2>7. How we read the results and why they come out this way</h2>
+  <p>We read each result in three steps. (1) Did the known sites rise to the top? (2) Which factors produce the similarity, and does that make physical sense? (3) What does <b>not</b> match at the best place? Five cases follow.</p>
+
+  <h3>7.1. Jezero crater (Mars), "All conditions" → Atacama Desert, Chile</h3>
+  <div class="pair">
+    <figure><img src="img/12-sites-jezero.jpg" alt=""><figcaption>Fig. 16. The best analogs of Jezero crater.</figcaption></figure>
+    <div>
+      <p>First place goes to the <b>Atacama</b> (24.0° S, 68.8° W, score 85, tagged "known"). The model did not know that the Atacama is the classic Mars test site and found it by itself. Why:</p>
+      <ul>
+        <li><b>bare ground 100%</b>, as on Mars;</li>
+        <li><b>precipitation 0.07 mm/day</b> (~30 mm a year), among the driest places on Earth;</li>
+        <li><b>elevation ~3000 m</b>: pressure 71.9 kPa, strong UV, a day–night swing of 45 °C;</li>
+        <li>relief of 357 m against 287 m at Jezero, with basaltic volcanism nearby, as on the crater floor.</li>
+      </ul>
+      <p><b>What does not match:</b> the impact crater (the nearest is tiny Monturaqui, 50 km away) and, of course, the absolute cold.</p>
+      <p>Next come the Pamir, the Altiplano, the Ahaggar in Algeria (a basalt plateau in the Sahara) and Tibesti in Chad. These are <b>new</b> candidates.</p>
+    </div>
+  </div>
+</section>
+
+<section style="break-before: page">
+  <h3 style="margin-top:0">7.2. Arsia Mons caves (Mars), "Geology &amp; sampling" → Harrat Khaybar, Saudi Arabia</h3>
+  <div class="pair">
+    <figure><img src="img/16-sites-arsia-geology.jpg" alt=""><figcaption>Fig. 17. The best analogs of the Arsia caves for geology.</figcaption></figure>
+    <div>
+      <p>First place by a wide margin (86 against 73 for the second) goes to <b>Harrat Khaybar</b> (25.5° N, 40.0° E), tagged <span class="tag">new</span>. Why:</p>
+      <ul>
+        <li>a vast <b>basaltic lava field</b>: the cell sits right on the Khaybar volcano;</li>
+        <li>the <b>Umm Jirsan</b> lava tube 22 km away, the longest known lava tube of the Arabian Peninsula;</li>
+        <li>bare ground, 30 mm of precipitation a year, elevation 1347 m.</li>
+      </ul>
+      <p>The target on Mars is a set of skylights into lava tubes on the flank of a shield volcano. Khaybar is the same type: basaltic lava and tubes, dry and without plants. NASA does not use it as an analog. This is the kind of result we value most: new, physically grounded and testable.</p>
+      <p>The logistics are convenient: Medina airport is 111 km away. Robustness is 100%. Next come Dallol (Ethiopia) and Iceland, both already known sites, which supports the logic of the selection.</p>
+    </div>
+  </div>
+  <figure><img src="img/15-earth-map-arsia-geology.jpg" alt=""><figcaption>Fig. 18. The map for the Arsia caves with the lava-tube layer on (turquoise triangles). The bright bands are the volcanic belts of Arabia, East Africa, the Andes and Iceland.</figcaption></figure>
+</section>
+
+<section>
+  <h3>7.3. Shackleton crater rim (Moon), "All conditions" → the Pamir, Tajikistan</h3>
+  <p>First place is at <b>39.0° N, 73.8° E</b> (score 85). This is the area of <b>Kara-Kul crater</b> in the Pamir: an impact structure 52 km wide at 4512 m. The model did not know about the crater directly; it saw a combination of factors:</p>
+  <ul>
+    <li>an impact crater (the Shackleton rim is also the edge of an impact crater);</li>
+    <li>bare ground, frost (−5 °C on average, nights of −30 °C) and a large day–night swing;</li>
+    <li>the low pressure of high mountains.</li>
+  </ul>
+  <p><b>Terrain up close</b> confirms the match at the 0.48 km scale too: a median slope of 16.4° in the Pamir against 16.3° on the Shackleton rim, and slopes over 10° covering 76% against 66%. The place deserves attention as a ground for testing landing and movement on steep slopes.</p>
+  <p><b>What does not match:</b> ultraviolet (on the Moon it has no atmospheric shield, in the Pamir it does) and, of course, the polar light. The rest of the top ten are the Tibetan highlands, the Karakoram and the Andean puna. That is to be expected: on Earth the most lunar conditions (thin air, dryness, frost and bare ground) come together in high-mountain deserts. For "Light &amp; power" the weight goes to latitude, and the result moves to the polar regions: north Greenland, Ellesmere Island and Svalbard take the first places.</p>
+  <div class="pair">
+    <figure><img src="img/08-compare-shackleton.jpg" alt=""><figcaption>Fig. 19. The Shackleton rim next to the Pamir place.</figcaption></figure>
+    <figure><img src="img/21-sites-hadley-rover.jpg" alt=""><figcaption>Fig. 20. Hadley Rille, "Rovers": the best match (96) is the Atacama puna by the Tilocalar volcano.</figcaption></figure>
+  </div>
+
+  <h3>7.4. Hadley Rille (Moon), "Rovers &amp; spacewalks" → the Atacama puna</h3>
+  <p>Rovers care about relief, slopes and bare ground. First place is at 24.0° S, 68.1° W (score 96), at 3436 m, 3 km from the basaltic Tilocalar volcano: lava flows, slopes and bare ground, as beside the Hadley lava channel at the foot of the lunar Apennines. In this scenario the known lunar sites have a median rank of top 7%, and 6 of 11 are in the best 10%.</p>
+</section>
+
+<section>
+  <h3>7.5. Arcadia Planitia (Mars), "Ice &amp; resource mining" → the polar deserts of the Arctic</h3>
+  <p>After the correction of section 6.4 the first places go to <b>Peary Land</b> in north Greenland (82.0° N) and the islands of the <b>Canadian Arctic Archipelago</b>. Haughton crater on Devon Island, a known Mars site, is sixth. The similarity comes from bare ground, frozen ground and mean temperature. These are polar deserts: permafrost under stony ground without plants, much like Martian ice under regolith.</p>
+  <p><b>What does not match:</b> the relief in places (Arcadia is one of the flattest surfaces on Mars), and there is more precipitation here than in the Dry Valleys.</p>
+  <figure><img src="img/19-earth-map-arcadia-ice.jpg" alt=""><figcaption>Fig. 21. Arcadia, "Ice": the brightest areas are the Arctic, Tibet and Antarctica. The numbered best places are mostly the polar deserts of Greenland and the Canadian archipelago; No. 6 is Haughton crater on Devon Island, a known site.</figcaption></figure>
+
+  <h3>7.6. The overall pattern</h3>
+  <div class="box">
+    <p>Earth analogs of the Moon and Mars gather in a few kinds of places, each answering to a certain group of conditions:</p>
+    <ul>
+      <li><b>high-mountain deserts</b> (the Altiplano and Andean puna, Tibet, the Pamir): thin air, frost, dryness, a large day–night swing;</li>
+      <li><b>hot deserts with basalt</b> (the Sahara: Ahaggar, Tibesti; Arabia: the harrats): bare ground, volcanic rock, lava tubes;</li>
+      <li><b>polar deserts</b> (the Arctic, the Dry Valleys): frozen ground under a bare surface, a low sun.</li>
+    </ul>
+    <p>That the three classic kinds of Earth analog (the Atacama, the Dry Valleys, volcanic fields) appear by themselves, without hints, is one more sign that the method captures physics and not chance.</p>
+  </div>
+</section>
+
+<!-- ================= 8 ================= -->
+<section class="chapter">
+  <h2>8. Limits</h2>
+  <ul>
+    <li><b>An analog is always partial.</b> Gravity, vacuum and cosmic radiation cannot be reproduced on Earth. The app therefore answers "alike for what exactly", not "where is a second Mars".</li>
+    <li><b>Resolution of ~55 km.</b> Single caves, crater rims or hills smaller than a cell are not seen. The app finds <i>regions</i>; the exact spot for a test site has to be chosen with finer data.</li>
+    <li><b>Moon and Mars climate values are rounded</b> figures from the literature (Diviner, REMS, MEDA, Phoenix, InSight, the Mars Climate Database), not our own measurements. (Updated since: see section 11.)</li>
+    <li><b>Lava tubes</b> are a hand-compiled list (22 well-documented systems). There is no global catalogue, so the list is incomplete and the coordinates approximate.</li>
+    <li><b>The "Geology" check is partly circular</b> (section 6.2), and the climate part for the Moon has nothing to be checked against (section 6.3).</li>
+    <li><b>Terrain up close</b> is precomputed for 1,525 candidates only; if the user changes the weights a lot, a new place may lack these data. The 0.48 km scale is that of a landing ellipse, not of a single boulder: boulders need HiRISE / LROC images, available only for selected areas.</li>
+    <li><b>The choice of weights</b> is a human decision. We make it transparent: the weights are visible and can be changed, and their effect is checked on the known sites.</li>
+  </ul>
+
+  <h2 style="margin-top:22pt">9. How to reproduce the results</h2>
+  <p>Code and prepared data: <b>github.com/ARKONEN1/NASA</b>. Node.js 18+ is required.</p>
+<pre>npm install
+npm run serve        # the app at http://localhost:5180
+
+npm run data         # download the source data (~20 min; NASA POWER limits the request rate)
+npm run build:data   # Earth grid, targets, maps, logistics, terrain up close (Copernicus)
+npm run validate     # the blind check on known sites (the table of section 6.2)
+node tools/robustness.mjs   # robustness of all the lists (the table of section 6.5)</pre>
+  <p>The app is a static site with no server. It can be deployed to Cloudflare Workers (the <code>wrangler.jsonc</code> configuration) or to any static hosting. The score is computed in the browser, so a change of weights recomputes the whole map at once.</p>
+</section>
+
+<!-- ================= 10 ================= -->
+<section class="chapter">
+  <h2>10. Data sources</h2>
+  <table>
+    <tr><th style="width:34%">Dataset</th><th>What we take from it</th></tr>
+    <tr><td>NASA POWER, climatology 2001–2025 (MERRA-2, CERES)</td><td>Surface temperature (mean, day, night), precipitation, moisture, pressure, UV index, wind</td></tr>
+    <tr><td>NOAA ETOPO1 (via ERDDAP)</td><td>Earth relief, 2′ spacing (~3.7 km)</td></tr>
+    <tr><td>MODIS Combined IGBP Land Cover 2024 (NASA GIBS)</td><td>Bare ground, ice, land mask, land-cover class</td></tr>
+    <tr><td>LRO LOLA: LDEM_16 and LDEM_75S_240M (PDS)</td><td>Lunar relief; the polar model for the Artemis areas</td></tr>
+    <tr><td>MGS MOLA MEGDR, 16 and 128 px/° (PDS)</td><td>Mars relief</td></tr>
+    <tr><td>Smithsonian Global Volcanism Program</td><td>Holocene volcanoes with rock type</td></tr>
+    <tr><td>Earth Impact Database (PASSC, UNB)</td><td>Confirmed exposed impact structures</td></tr>
+    <tr><td>Natural Earth 1:50m</td><td>Country borders and names (English and Ukrainian)</td></tr>
+    <tr><td>ESA Copernicus DEM GLO-30 (AWS Open Data)</td><td>Terrain up close for 1,525 candidates</td></tr>
+    <tr><td>Natural Earth 1:10m: populated places, airports</td><td>Logistics: the nearest town and airport</td></tr>
+    <tr><td>LRO LOLA LDEM_64; MGS MOLA MEGDR 128 px/°</td><td>Terrain up close for the Moon and Mars targets</td></tr>
+    <tr><td>NASA GIBS: Blue Marble, ASTER GDEM</td><td>Base map, images and shaded relief of Earth places</td></tr>
+    <tr><td>LRO Diviner; Curiosity REMS; Perseverance MEDA; Phoenix MET; InSight APSS; Mars Climate Database</td><td>Surface climate of the Moon and Mars targets (rounded values)</td></tr>
+  </table>
+  <figure><img src="img/23-method.jpg" alt=""><figcaption>Fig. 22. The "How it works" section in the app itself: a short account of the method, the limits and the sources.</figcaption></figure>
+</section>
+
+<section class="chapter">
+  <h2>11. What has been added since October</h2>
+  <p>Sections 1–10 describe the October version, and their numbers refer to it. Since then the app has been extended:</p>
+  <ul>
+    <li><b>There are now 20 factors.</b> Added: dust in the air (optical depth of coarse aerosol, MERRA-2 via NASA POWER) and three rock types from the GLiM lithological map: plutonic rock (like the lunar highlands), sedimentary rock and salt deposits.</li>
+    <li><b>There are now 8 purposes.</b> Added: "Landing &amp; construction" and "Search for life" (Mars only).</li>
+    <li><b>Moon and Mars climate is now computed from data</b> for each target: LRO Diviner Global Cumulative Products and the Mars Climate Database v6.2, instead of rounded literature values.</li>
+    <li><b>The method check uses AUC</b>, the chance that a known site ranks above a random place on land. On the original 19 sites the AUC ranges from 0.60 to 0.80; on the extended list of 31 sites it is 0.56–0.77. The weakest case is the same: Moon, "Habitats".</li>
+    <li><b>A "well-studied region" tag</b> for places inside the regions the challenge names as well known (Atacama, Antarctica, Iceland, Hawaii, the Mojave and Death Valley, Devon Island), and an "Only little-studied places" filter.</li>
+    <li><b>A comparison with the best known test site</b> and a <b>"Processes it shares"</b> block: dust storms, salt deposits, permafrost, basaltic volcanism, lava tubes, impact cratering, thermal weathering.</li>
+    <li><b>A verdict in the place card:</b> where the analogy is strong, where it breaks down, what no place on Earth can give (gravity, pressure and radiation dose, in numbers) and what to rehearse here.</li>
+    <li><b>"Life at the limits":</b> a map layer and a card block with 23 places where peer-reviewed studies document extremophiles or ancient traces of life (Yungay, Río Tinto, Dallol, University Valley, Kidd Creek Mine, Movile Cave and others), each with its reference. The list is hand-compiled, the coordinates are approximate, and it does not affect the similarity score.</li>
+  </ul>
+  <p class="muted" style="margin-top:16pt">Independent student project for the NASA Space Apps Challenge 2026. Not an official NASA product and not endorsed by NASA. Author: A. Shyrokov.</p>
+</section>
+
+</body>
+</html>
