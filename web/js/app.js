@@ -478,6 +478,7 @@ function renderCompare() {
     <div class="cmp-score"><span class="score-word">${t('scoreWord')}</span><strong>${Math.round(scores[i] * 100)}</strong><span>${esc(t('scoreLine', { share: topShare(ranks[i]), purpose: lowerFirst(pName(state.purpose)) }))}</span>
       <span class="stab-line" title="${esc(t('stabilityHint'))}">${stabText(i)}</span>
       <button class="dossier-btn" id="dossier-btn">${t('dossierBtn')}</button></div>
+    ${verdictHtml(i)}
     ${vsKnownHtml(i)}
     ${processHtml(i)}
     <div class="cmp-bar"><button class="fold fx-toggle" id="fx-toggle" aria-expanded="${state.factorsOpen}" aria-controls="fx-col"><span>${t(state.factorsOpen ? 'fxHide' : 'fxShow')}</span><span class="chev side" aria-hidden="true"></span></button></div>
@@ -639,6 +640,41 @@ function processHtml(i) {
   }).join('')}</ul></div>`;
 }
 
+// ---------- verdict: where the analogy holds, where it breaks down, what Earth cannot give, what to rehearse ----------
+// Fixed physical figures no Earth site can change. Dose: Moon — Chang'e-4 LND (Zhang et al. 2020, Sci. Adv. 6);
+// Mars — MSL RAD (Hassler et al. 2014, Science 343); Earth — world mean natural background, 2.4 mSv/yr (UNSCEAR 2008).
+const PHYS = { earth: { g: 9.81, dose: 2.4 / 365 }, moon: { g: 1.62, dose: 1.37 }, mars: { g: 3.71, dose: 0.67 } };
+const purposeCache = new Map();
+function purposesOf(i) {
+  const key = `${state.targetId}|${i}`;
+  if (!purposeCache.has(key)) { if (purposeCache.size > 40) purposeCache.clear(); purposeCache.set(key, allPurposes(model, prof, i)); }
+  return purposeCache.get(key);
+}
+function verdictHtml(i) {
+  const rows = explain(model, i, prof, state.weights).filter((r) => r.weight > 0 && Number.isFinite(r.sim));
+  const chip = (r) => `<span title="${esc(fName(r.f))}: ${fmtValue(r.f, r.earth)} / ${fmtValue(r.f, r.target)}">${esc(fShort(r.f))} <i>${Math.round(r.sim * 100)}%</i></span>`;
+  const strong = rows.filter((r) => r.sim >= 0.85).sort((a, b) => b.sim * b.weight - a.sim * a.weight).slice(0, 5);
+  const weak = rows.filter((r) => r.sim < 0.6).sort((a, b) => a.sim - b.sim).slice(0, 5);
+  const P = PHYS[state.body], E = PHYS.earth, ratio = (a, b) => num(a / b, a / b < 10 ? 1 : 0);
+  const pT = prof.pressure?.value ?? 0, pE = model.col.pressure[i];
+  const phys = [
+    [t('vdGravity'), `${num(E.g, 2)} ${t('vdMs2')}`, `${num(P.g, 2)} ${t('vdMs2')}`, t('vdTimesLess', { x: ratio(E.g, P.g) })],
+    [t('vdPressure'), fmtValue('pressure', pE), pT > 0 ? fmtValue('pressure', pT) : t('vdVacuum'), pT > 0 && Number.isFinite(pE) ? t('vdTimesLess', { x: ratio(pE, pT) }) : ''],
+    [t('vdDose'), `${num(E.dose, 3)} ${t('vdMsv')}`, `${num(P.dose, 2)} ${t('vdMsv')}`, t('vdTimesMore', { x: ratio(P.dose, E.dose) })],
+  ];
+  const all = purposesOf(i);
+  const uses = purposesFor(state.body).filter((p) => p !== 'balanced').map((p) => ({ p, rank: 1 - all[p].top }))
+    .sort((a, b) => b.rank - a.rank).slice(0, 3);
+  return `<div class="verdict">
+    <div class="vd-col"><h3>${t('vdStrong')}</h3><div class="vd-chips good">${strong.map(chip).join('') || '—'}</div>
+      <h3>${t('vdWeak')}</h3><div class="vd-chips bad">${weak.map(chip).join('') || `<em>${t('vdNoWeak')}</em>`}</div></div>
+    <div class="vd-col"><h3>${t('vdCannot')} <span class="info" title="${esc(t('vdCannotHint'))}">?</span></h3>
+      <table class="vd-phys"><thead><tr><th></th><th>${t('earth')}</th><th>${esc(t(state.body))}</th><th></th></tr></thead><tbody>${phys.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody></table></div>
+    <div class="vd-col"><h3>${t('vdUse')} <span class="info" title="${esc(t('vdUseHint'))}">?</span></h3>
+      <ul class="vd-use">${uses.map((u) => `<li><b>${esc(pName(u.p))}</b> <i>${esc(topShare(u.rank))}</i><span>${esc(S().purposes[u.p][1])}</span></li>`).join('')}</ul></div>
+  </div>`;
+}
+
 let bestKnown = null;
 function findBestKnown() {
   bestKnown = null;
@@ -795,7 +831,7 @@ async function openDossier(i) {
     </header>
     <section class="ds-cols">
       <div><h2>${t('earth')}</h2><p class="site-facts">${siteFacts(i)}</p>${nearbyHtml(la, lo)}${logisticsHtml(la, lo)}
-        <h2>${t('dossierWhy')}</h2><p>${esc(whyLine(i))}</p>${vsKnownHtml(i, true)}${processHtml(i)}</div>
+        <h2>${t('dossierWhy')}</h2><p>${esc(whyLine(i))}</p>${vsKnownHtml(i, true)}${processHtml(i)}${verdictHtml(i)}</div>
       <div><h2>${esc(t(state.body))} · ${esc(tx(tg, 'kind'))}</h2><p><b>${esc(tx(tg, 'name'))}</b>, ${fmtCoords(tg.lat, tg.lon)}. ${esc(tx(tg, 'mission'))}.</p><p>${esc(tx(tg, 'why'))}</p></div>
     </section>
     <section class="ds-imgs">

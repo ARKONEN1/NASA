@@ -3,6 +3,11 @@ export const STRINGS = {
   en: {
     procHint: "Earth processes at this place that reproduce processes on the Moon or Mars: the analog is a natural laboratory for them, not only a look-alike.",
     procTitle: "Processes it shares",
+    vdStrong: "Where the analogy is strong", vdWeak: "Where it breaks down", vdNoWeak: "no counted factor falls below 60%",
+    vdCannot: "What no place on Earth can give", vdCannotHint: "Fixed physical conditions. Radiation dose on the surface: Moon — Chang’e-4 LND (Zhang et al. 2020); Mars — Curiosity RAD (Hassler et al. 2014); Earth — world mean natural background, 2.4 mSv a year (UNSCEAR). Air pressure on Earth is the value for this place (NASA POWER).",
+    vdGravity: "Gravity", vdPressure: "Air pressure", vdDose: "Radiation dose", vdVacuum: "vacuum", vdMs2: "m/s²", vdMsv: "mSv/day",
+    vdTimesLess: "{x}× lower", vdTimesMore: "{x}× higher",
+    vdUse: "What to rehearse here", vdUseHint: "The three purposes for which this place ranks highest among Earth’s land, for the chosen Moon or Mars site.",
     vsSame: "This is the best known test site for this target: {name}",
     vsFarther: "Farther in",
     vsCloser: "Closer to the target in",
@@ -159,6 +164,11 @@ export const STRINGS = {
   uk: {
     procHint: "Процеси на Землі в цьому місці, які відтворюють процеси на Місяці чи Марсі: аналог стає природною лабораторією, а не лише схожим краєвидом.",
     procTitle: "Спільні процеси",
+    vdStrong: "Де аналогія сильна", vdWeak: "Де вона не працює", vdNoWeak: "жоден врахований фактор не нижчий за 60%",
+    vdCannot: "Чого не дасть жодне місце на Землі", vdCannotHint: "Сталі фізичні умови. Доза радіації на поверхні: Місяць — Chang’e-4 LND (Zhang et al. 2020); Марс — Curiosity RAD (Hassler et al. 2014); Земля — середній природний фон, 2,4 мЗв на рік (UNSCEAR). Тиск на Землі взято для цього місця (NASA POWER).",
+    vdGravity: "Сила тяжіння", vdPressure: "Тиск повітря", vdDose: "Доза радіації", vdVacuum: "вакуум", vdMs2: "м/с²", vdMsv: "мЗв/добу",
+    vdTimesLess: "у {x}× менше", vdTimesMore: "у {x}× більше",
+    vdUse: "Що тут варто відпрацювати", vdUseHint: "Три призначення, за якими це місце стоїть найвище серед суходолу Землі для обраної точки на Місяці чи Марсі.",
     vsSame: "Це і є найкращий відомий полігон для цієї цілі: {name}",
     vsFarther: "Далі за",
     vsCloser: "Ближче до цілі за",

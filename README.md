@@ -15,6 +15,7 @@ The interface is in English and Ukrainian (switch in the header).
 3. The map colours every land cell on Earth (about 55 km) by how alike it is. The best places are listed, each tagged **new** or **known** (within 150 km of an established analog site).
 4. Each place gets a card: land cover, height, climate in one line, the nearest named volcano, impact crater and lava tube, a factor-by-factor comparison, and shaded relief of both places side by side.
 5. Each place also gets a **fingerprint** (radar of all factors on Earth's scale, target vs place), **terrain up close** (20 km window, 0.48 km baseline: ESA Copernicus DEM on Earth, LOLA on the Moon, MOLA on Mars), **robustness** (see below) and **logistics** (nearest town and airport).
+   The card also gives a **verdict**: where the analogy is strong and where it breaks down (factor matches in percent), what no place on Earth can give (gravity, air pressure and radiation dose, Earth vs the Moon or Mars), and the three purposes this place is best suited to rehearse.
 6. **Dossier (PDF):** one printable page per candidate, with score, robustness, logistics, images, fingerprint, fit for every purpose and all factors.
 7. **Discoveries:** a five-step guided tour of the main findings. Every view has a shareable link, e.g. `#/mars/arsia/geology/25.5,40`.
 8. The top 50 places can be downloaded as CSV or GeoJSON, with every factor value, its match, robustness, logistics and terrain up close.
