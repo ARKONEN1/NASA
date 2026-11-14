@@ -1,5 +1,6 @@
 // Save a site dossier exactly as the app prints it.
 // Usage: node docs/tools/dossier.cjs <puppeteer-core dir> <browser exe> <hash> <out.pdf> [lang]
+// In Git Bash set MSYS_NO_PATHCONV=1, or it rewrites a hash like '#/mars/arsia/...' into a Windows path.
 const path = require('path');
 const puppeteer = require(path.join(process.argv[2], 'node_modules', 'puppeteer-core'));
 const [, , , exe, hash, out, lang = 'uk'] = process.argv;
@@ -12,7 +13,7 @@ const [, , , exe, hash, out, lang = 'uk'] = process.argv;
   // Wait for the robustness check, then build the dossier without opening the print dialog.
   await page.waitForFunction(() => /\d+%/.test(document.querySelector('.stab-line')?.textContent || ''), { timeout: 120000 });
   await page.evaluate(() => { window.print = () => {}; window.__noPrintCleanup = true; });
-  await page.click('#dossier-btn');
+  await page.evaluate(() => document.querySelector('#dossier-btn').click());
   await page.waitForFunction(() => document.body.classList.contains('printing-dossier'), { timeout: 60000 });
   await page.evaluate(() => { const r = document.body.classList.remove.bind(document.body.classList); document.body.classList.remove = () => {}; setTimeout(() => (document.body.classList.remove = r), 5000); });
   await page.emulateMediaType('print');

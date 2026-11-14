@@ -242,7 +242,7 @@
     <tr><td>Relief, slope</td><td>NOAA ETOPO1, 3.7 km spacing</td><td>LRO LOLA (240 m near the pole), MGS MOLA 128 px/° (~460 m)</td></tr>
     <tr><td>Terrain up close (for information)</td><td>ESA Copernicus DEM (240 m level), 0.48 km baseline</td><td>LRO LOLA 240 m / LDEM_64 474 m; MGS MOLA 463 m</td></tr>
     <tr><td>Logistics (for information)</td><td>Natural Earth: 7,342 populated places, 893 airports</td><td>—</td></tr>
-    <tr><td>Ground temperature: mean, day–night swing, night</td><td>NASA POWER, climatology 2001–2025 (MERRA-2)</td><td>LRO Diviner; Curiosity REMS, Perseverance MEDA, Phoenix, InSight, Mars Climate Database (rounded)</td></tr>
+    <tr><td>Ground temperature: mean, day–night swing, night</td><td>NASA POWER, climatology 2001–2025 (MERRA-2)</td><td>LRO Diviner; Mars Climate Database v6.2 (computed for each site since November, see section 11)</td></tr>
     <tr><td>Precipitation, air moisture, pressure, UV, wind</td><td>NASA POWER (UV from CERES)</td><td>Values from the literature: no precipitation, almost no water vapour, pressure 0–0.9 kPa</td></tr>
     <tr><td>Bare ground, ice</td><td>MODIS IGBP Land Cover 2024 via NASA GIBS</td><td>The surface is always bare</td></tr>
     <tr><td>Frozen ground</td><td>Share of months below 0 °C, or share of ice</td><td>0–1 from known ground ice</td></tr>
@@ -446,20 +446,26 @@ node tools/robustness.mjs   # robustness of all the lists (the table of section 
   <h2>10. Data sources</h2>
   <table>
     <tr><th style="width:34%">Dataset</th><th>What we take from it</th></tr>
-    <tr><td>NASA POWER, climatology 2001–2025 (MERRA-2, CERES)</td><td>Surface temperature (mean, day, night), precipitation, moisture, pressure, UV index, wind</td></tr>
-    <tr><td>NOAA ETOPO1 (via ERDDAP)</td><td>Earth relief, 2′ spacing (~3.7 km)</td></tr>
-    <tr><td>MODIS Combined IGBP Land Cover 2024 (NASA GIBS)</td><td>Bare ground, ice, land mask, land-cover class</td></tr>
-    <tr><td>LRO LOLA: LDEM_16 and LDEM_75S_240M (PDS)</td><td>Lunar relief; the polar model for the Artemis areas</td></tr>
-    <tr><td>MGS MOLA MEGDR, 16 and 128 px/° (PDS)</td><td>Mars relief</td></tr>
-    <tr><td>Smithsonian Global Volcanism Program</td><td>Holocene volcanoes with rock type</td></tr>
-    <tr><td>Earth Impact Database (PASSC, UNB)</td><td>Confirmed exposed impact structures</td></tr>
-    <tr><td>Natural Earth 1:50m</td><td>Country borders and names (English and Ukrainian)</td></tr>
-    <tr><td>ESA Copernicus DEM GLO-30 (AWS Open Data)</td><td>Terrain up close for 1,525 candidates</td></tr>
-    <tr><td>Natural Earth 1:10m: populated places, airports</td><td>Logistics: the nearest town and airport</td></tr>
-    <tr><td>LRO LOLA LDEM_64; MGS MOLA MEGDR 128 px/°</td><td>Terrain up close for the Moon and Mars targets</td></tr>
-    <tr><td>NASA GIBS: Blue Marble, ASTER GDEM</td><td>Base map, images and shaded relief of Earth places</td></tr>
-    <tr><td>LRO Diviner; Curiosity REMS; Perseverance MEDA; Phoenix MET; InSight APSS; Mars Climate Database</td><td>Surface climate of the Moon and Mars targets (rounded values)</td></tr>
-  </table>
+    <tr><td><a href="https://power.larc.nasa.gov/">NASA POWER, climatology 2001–2025 (MERRA-2, CERES)</a></td><td>Surface temperature (mean, day, night), precipitation, moisture, pressure, UV index, wind</td></tr>
+    <tr><td><a href="https://www.ncei.noaa.gov/products/etopo-global-relief-model">NOAA ETOPO1 (via ERDDAP)</a></td><td>Earth relief, 2′ spacing (~3.7 km)</td></tr>
+    <tr><td><a href="https://www.earthdata.nasa.gov/data/catalog/lpcloud-mcd12q1-061">MODIS Combined IGBP Land Cover 2024 (NASA GIBS)</a></td><td>Bare ground, ice, land mask, land-cover class</td></tr>
+    <tr><td><a href="https://pds-geosciences.wustl.edu/missions/lro/lola.htm">LRO LOLA: LDEM_16 and LDEM_75S_240M (PDS)</a></td><td>Lunar relief; the polar model for the Artemis areas</td></tr>
+    <tr><td><a href="https://pds-geosciences.wustl.edu/missions/mgs/megdr.html">MGS MOLA MEGDR, 16 and 128 px/° (PDS)</a></td><td>Mars relief</td></tr>
+    <tr><td><a href="https://volcano.si.edu/">Smithsonian Global Volcanism Program</a></td><td>Holocene volcanoes with rock type</td></tr>
+    <tr><td><a href="http://www.passc.net/EarthImpactDatabase/">Earth Impact Database (PASSC, UNB)</a></td><td>Confirmed exposed impact structures</td></tr>
+    <tr><td><a href="https://www.naturalearthdata.com/">Natural Earth 1:50m</a></td><td>Country borders and names (English and Ukrainian)</td></tr>
+    <tr><td><a href="https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM">ESA Copernicus DEM GLO-30 (AWS Open Data)</a></td><td>Terrain up close for 1,525 candidates</td></tr>
+    <tr><td><a href="https://www.naturalearthdata.com/">Natural Earth 1:10m: populated places, airports</a></td><td>Logistics: the nearest town and airport</td></tr>
+    <tr><td><a href="https://pds-geosciences.wustl.edu/missions/lro/lola.htm">LRO LOLA LDEM_64; MGS MOLA MEGDR 128 px/°</a></td><td>Terrain up close for the Moon and Mars targets</td></tr>
+    <tr><td><a href="https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api">NASA GIBS: Blue Marble, ASTER GDEM</a></td><td>Base map, images and shaded relief of Earth places</td></tr>
+    <tr><td><a href="https://pds-geosciences.wustl.edu/missions/lro/diviner.htm">LRO Diviner</a>; <a href="https://www-mars.lmd.jussieu.fr/mcd_python/">Mars Climate Database v6.2</a> (since November, see section 11)</td><td>Surface climate of the Moon and Mars targets (rounded values)</td></tr>
+  
+    <tr><td><a href="https://gmao.gsfc.nasa.gov/gmao-products/merra-2/">MERRA-2 aerosol optical depth (via POWER)</a></td><td>Dust in the air (since November)</td></tr>
+    <tr><td><a href="https://doi.org/10.1594/PANGAEA.788537">GLiM v1.0 Global Lithological Map</a> (Hartmann &amp; Moosdorf 2012, CC BY 3.0)</td><td>Plutonic, sedimentary rock and evaporites (since November)</td></tr>
+    <tr><td><a href="https://ntrs.nasa.gov/citations/19730010172">NASA Apollo crew dosimetry, TN D-7080</a> (English et al. 1973)</td><td>Radiation dose on the Moon (since November)</td></tr>
+    <tr><td><a href="https://doi.org/10.1126/science.1244797">Curiosity RAD</a> (Hassler et al. 2014, Science 343)</td><td>Radiation dose on Mars (since November)</td></tr>
+    <tr><td><a href="https://www.unscear.org/unscear/en/publications/2008_1.html">UNSCEAR 2008 report</a></td><td>Natural radiation background on Earth</td></tr>
+    <tr><td>Papers on life at the limits (DOI link with each site in the app)</td><td>The "Life at the limits" layer (since November)</td></tr></table>
   <figure><img src="img/23-method.jpg" alt=""><figcaption>Fig. 22. The "How it works" section in the app itself: a short account of the method, the limits and the sources.</figcaption></figure>
 </section>
 

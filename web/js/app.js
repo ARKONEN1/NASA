@@ -6,6 +6,7 @@ import {
 import { t, getLang, setLang, applyStatic, STRINGS } from './i18n.js';
 import { radarSvg, detailRows, logistics } from './extras.js';
 import { studiedRegion } from './studied.js';
+import { SRC, GROUPS } from './sources.js';
 
 const $ = (s) => document.querySelector(s);
 const state = { body: 'moon', targetId: null, purpose: 'balanced', weights: { ...PURPOSES.balanced.w }, selected: -1, onlyNew: false, sitesOpen: false, factorsOpen: false };
@@ -199,7 +200,7 @@ function lifeNear(la, lo, maxKm = 300) {
 function lifeHtml(la, lo) {
   const list = lifeNear(la, lo).slice(0, 2);
   return `<div class="procs life"><h3>${t('lifeTitle')} <span class="info" title="${esc(t('lifeHint'))}">?</span></h3>${list.length
-    ? `<ul>${list.map(({ x, d }) => `<li><b>${esc(lifeName(x))}</b>, ${Math.round(d)} ${t('km')} · ${esc(S().lifeKinds[x.kind])}. ${esc(lifeText(x))} <i class="ref">${esc(x.ref)}</i></li>`).join('')}</ul>`
+    ? `<ul>${list.map(({ x, d }) => `<li><b>${esc(lifeName(x))}</b>, ${Math.round(d)} ${t('km')} · ${esc(S().lifeKinds[x.kind])}. ${esc(lifeText(x))} ${x.doi ? `<a class="ref" href="https://doi.org/${esc(x.doi)}" target="_blank" rel="noopener noreferrer">${esc(x.ref)}</a>` : `<i class="ref">${esc(x.ref)}</i>`}</li>`).join('')}</ul>`
     : `<p class="hint">${t('lifeNone')}</p>`}</div>`;
 }
 map.on('click', (e) => {
@@ -600,9 +601,12 @@ function renderCheck() {
   document.querySelectorAll('.check-list li').forEach((li) => (li.onclick = () => select(+li.dataset.i)));
 }
 
+// Every source is a link to the official page of the provider or to the paper's DOI (see sources.js).
 function renderSources() {
-  $('#sources').innerHTML = [...Object.values(meta.sources), targets.sources.moon, targets.sources.mars, t('srcClimateBodies'), t('srcThumbs'), t('srcLife')]
-    .map((s) => `<li>${esc(s)}</li>`).join('');
+  const lang = getLang();
+  const a = (u, txt) => `<a class="src-link" href="${esc(u)}" target="_blank" rel="noopener noreferrer">${esc(txt)}</a>`;
+  $('#sources').innerHTML = GROUPS.map((g) => `<li class="src-group"><b>${esc(g[lang])}</b><ul>${g.items.map((it) =>
+    `<li>${a(it.url, it[lang])}${it['w' + lang] ? ` — ${esc(it['w' + lang])}` : ''}${it.extra ? ` (${a(it.extra[0], it.extra[1] === 'paper' ? t('srcPaper') : it.extra[1])})` : ''}</li>`).join('')}</ul></li>`).join('');
 }
 
 function select(i, { pan = true, fromMap = false } = {}) {
@@ -693,11 +697,14 @@ function verdictHtml(i) {
   const all = purposesOf(i);
   const uses = purposesFor(state.body).filter((p) => p !== 'balanced').map((p) => ({ p, rank: 1 - all[p].top }))
     .sort((a, b) => b.rank - a.rank).slice(0, 3);
+  const lang = getLang();
+  const srcLink = (k) => `<a class="src-link" href="${SRC[k].url}" target="_blank" rel="noopener noreferrer">${esc(SRC[k][lang])}</a>`;
+  const srcLine = `<p class="vd-src">${t('vdSources')}: ${[state.body === 'moon' ? 'apollo' : 'rad', 'unscear', 'power'].map(srcLink).join(' · ')}</p>`;
   return `<div class="verdict">
     <div class="vd-col"><h3>${t('vdStrong')}</h3><div class="vd-chips good">${strong.map(chip).join('') || '—'}</div>
       <h3>${t('vdWeak')}</h3><div class="vd-chips bad">${weak.map(chip).join('') || `<em>${t('vdNoWeak')}</em>`}</div></div>
     <div class="vd-col"><h3>${t('vdCannot')} <span class="info" title="${esc(t('vdCannotHint'))}">?</span></h3>
-      <table class="vd-phys"><thead><tr><th></th><th>${t('earth')}</th><th>${esc(t(state.body))}</th><th></th></tr></thead><tbody>${phys.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody></table></div>
+      <table class="vd-phys"><thead><tr><th></th><th>${t('earth')}</th><th>${esc(t(state.body))}</th><th></th></tr></thead><tbody>${phys.map((r) => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td></tr>`).join('')}</tbody></table>${srcLine}</div>
     <div class="vd-col"><h3>${t('vdUse')} <span class="info" title="${esc(t('vdUseHint'))}">?</span></h3>
       <ul class="vd-use">${uses.map((u) => `<li><b>${esc(pName(u.p))}</b> <i>${esc(topShare(u.rank))}</i><span>${esc(S().purposes[u.p][1])}</span></li>`).join('')}</ul></div>
   </div>`;

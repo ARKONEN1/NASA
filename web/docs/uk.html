@@ -243,7 +243,7 @@
     <tr><td>Рельєф, схил</td><td>NOAA ETOPO1, крок 3,7 км</td><td>LRO LOLA (біля полюса — 240 м), MGS MOLA 128 точок/° (~460 м)</td></tr>
     <tr><td>Рельєф зблизька (інформаційно)</td><td>ESA Copernicus DEM (рівень 240 м), база 0,48 км</td><td>LRO LOLA 240 м / LDEM_64 474 м; MGS MOLA 463 м</td></tr>
     <tr><td>Логістика (інформаційно)</td><td>Natural Earth: 7 342 поселення, 893 аеропорти</td><td>—</td></tr>
-    <tr><td>Температура ґрунту: середня, перепад день–ніч, нічна</td><td>NASA POWER, кліматологія 2001–2025 (MERRA-2)</td><td>LRO Diviner; Curiosity REMS, Perseverance MEDA, Phoenix, InSight, Mars Climate Database (округлено)</td></tr>
+    <tr><td>Температура ґрунту: середня, перепад день–ніч, нічна</td><td>NASA POWER, кліматологія 2001–2025 (MERRA-2)</td><td>LRO Diviner; Mars Climate Database v6.2 (обчислено для кожної цілі з листопада, див. розділ 11)</td></tr>
     <tr><td>Опади, волога повітря, тиск, УФ, вітер</td><td>NASA POWER (УФ — з CERES)</td><td>Значення з публікацій: опадів немає, водяної пари майже немає, тиск 0–0,9 кПа</td></tr>
     <tr><td>Голий ґрунт, лід</td><td>MODIS IGBP Land Cover 2024 через NASA GIBS</td><td>Поверхня завжди гола</td></tr>
     <tr><td>Мерзлий ґрунт</td><td>Частка місяців нижче 0 °C або частка льоду</td><td>0–1 за відомим ґрунтовим льодом</td></tr>
@@ -447,20 +447,26 @@ node tools/robustness.mjs   # стійкість усіх 90 списків (т�
   <h2>10. Джерела даних</h2>
   <table>
     <tr><th style="width:34%">Набір даних</th><th>Що з нього беремо</th></tr>
-    <tr><td>NASA POWER, кліматологія 2001–2025 (MERRA-2, CERES)</td><td>Температура поверхні (середня, денна, нічна), опади, волога, тиск, УФ-індекс, вітер</td></tr>
-    <tr><td>NOAA ETOPO1 (через ERDDAP)</td><td>Рельєф Землі, крок 2′ (~3,7 км)</td></tr>
-    <tr><td>MODIS Combined IGBP Land Cover 2024 (NASA GIBS)</td><td>Голий ґрунт, лід, маска суходолу, тип покриву</td></tr>
-    <tr><td>LRO LOLA: LDEM_16 та LDEM_75S_240M (PDS)</td><td>Рельєф Місяця; полярна модель для районів Artemis</td></tr>
-    <tr><td>MGS MOLA MEGDR, 16 і 128 точок/° (PDS)</td><td>Рельєф Марса</td></tr>
-    <tr><td>Smithsonian Global Volcanism Program</td><td>Голоценові вулкани з типом породи</td></tr>
-    <tr><td>Earth Impact Database (PASSC, UNB)</td><td>Підтверджені відкриті імпактні структури</td></tr>
-    <tr><td>Natural Earth 1:50m</td><td>Межі й назви країн (англійською та українською)</td></tr>
-    <tr><td>ESA Copernicus DEM GLO-30 (AWS Open Data)</td><td>Рельєф зблизька для 1 525 кандидатів</td></tr>
-    <tr><td>Natural Earth 1:10m: населені пункти, аеропорти</td><td>Логістика: найближче поселення й аеропорт</td></tr>
-    <tr><td>LRO LOLA LDEM_64; MGS MOLA MEGDR 128 точок/°</td><td>Рельєф зблизька цілей на Місяці й Марсі</td></tr>
-    <tr><td>NASA GIBS: Blue Marble, ASTER GDEM</td><td>Підкладка карти, знімки та відмивки рельєфу земних місць</td></tr>
-    <tr><td>LRO Diviner; Curiosity REMS; Perseverance MEDA; Phoenix MET; InSight APSS; Mars Climate Database</td><td>Клімат поверхні цілей на Місяці й Марсі (округлені значення)</td></tr>
-  </table>
+    <tr><td><a href="https://power.larc.nasa.gov/">NASA POWER, кліматологія 2001–2025 (MERRA-2, CERES)</a></td><td>Температура поверхні (середня, денна, нічна), опади, волога, тиск, УФ-індекс, вітер</td></tr>
+    <tr><td><a href="https://www.ncei.noaa.gov/products/etopo-global-relief-model">NOAA ETOPO1 (через ERDDAP)</a></td><td>Рельєф Землі, крок 2′ (~3,7 км)</td></tr>
+    <tr><td><a href="https://www.earthdata.nasa.gov/data/catalog/lpcloud-mcd12q1-061">MODIS Combined IGBP Land Cover 2024 (NASA GIBS)</a></td><td>Голий ґрунт, лід, маска суходолу, тип покриву</td></tr>
+    <tr><td><a href="https://pds-geosciences.wustl.edu/missions/lro/lola.htm">LRO LOLA: LDEM_16 та LDEM_75S_240M (PDS)</a></td><td>Рельєф Місяця; полярна модель для районів Artemis</td></tr>
+    <tr><td><a href="https://pds-geosciences.wustl.edu/missions/mgs/megdr.html">MGS MOLA MEGDR, 16 і 128 точок/° (PDS)</a></td><td>Рельєф Марса</td></tr>
+    <tr><td><a href="https://volcano.si.edu/">Smithsonian Global Volcanism Program</a></td><td>Голоценові вулкани з типом породи</td></tr>
+    <tr><td><a href="http://www.passc.net/EarthImpactDatabase/">Earth Impact Database (PASSC, UNB)</a></td><td>Підтверджені відкриті імпактні структури</td></tr>
+    <tr><td><a href="https://www.naturalearthdata.com/">Natural Earth 1:50m</a></td><td>Межі й назви країн (англійською та українською)</td></tr>
+    <tr><td><a href="https://dataspace.copernicus.eu/explore-data/data-collections/copernicus-contributing-missions/collections-description/COP-DEM">ESA Copernicus DEM GLO-30 (AWS Open Data)</a></td><td>Рельєф зблизька для 1 525 кандидатів</td></tr>
+    <tr><td><a href="https://www.naturalearthdata.com/">Natural Earth 1:10m: населені пункти, аеропорти</a></td><td>Логістика: найближче поселення й аеропорт</td></tr>
+    <tr><td><a href="https://pds-geosciences.wustl.edu/missions/lro/lola.htm">LRO LOLA LDEM_64; MGS MOLA MEGDR 128 точок/°</a></td><td>Рельєф зблизька цілей на Місяці й Марсі</td></tr>
+    <tr><td><a href="https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api">NASA GIBS: Blue Marble, ASTER GDEM</a></td><td>Підкладка карти, знімки та відмивки рельєфу земних місць</td></tr>
+    <tr><td><a href="https://pds-geosciences.wustl.edu/missions/lro/diviner.htm">LRO Diviner</a>; <a href="https://www-mars.lmd.jussieu.fr/mcd_python/">Mars Climate Database v6.2</a> (з листопада, див. розділ 11)</td><td>Клімат поверхні цілей на Місяці й Марсі (округлені значення)</td></tr>
+  
+    <tr><td><a href="https://gmao.gsfc.nasa.gov/gmao-products/merra-2/">MERRA-2, аерозольна оптична товщина (через POWER)</a></td><td>Пил у повітрі (з листопада)</td></tr>
+    <tr><td><a href="https://doi.org/10.1594/PANGAEA.788537">GLiM v1.0, глобальна літологічна карта</a> (Hartmann &amp; Moosdorf 2012, CC BY 3.0)</td><td>Плутонічні, осадові породи й евапорити (з листопада)</td></tr>
+    <tr><td><a href="https://ntrs.nasa.gov/citations/19730010172">Дозиметрія екіпажів NASA Apollo, TN D-7080</a> (English et al. 1973)</td><td>Доза радіації на Місяці (з листопада)</td></tr>
+    <tr><td><a href="https://doi.org/10.1126/science.1244797">Curiosity RAD</a> (Hassler et al. 2014, Science 343)</td><td>Доза радіації на Марсі (з листопада)</td></tr>
+    <tr><td><a href="https://www.unscear.org/unscear/en/publications/2008_1.html">Звіт UNSCEAR 2008</a></td><td>Природний радіаційний фон на Землі</td></tr>
+    <tr><td>Статті про життя на межі (посилання на DOI біля кожного місця в застосунку)</td><td>Шар «Життя на межі» (з листопада)</td></tr></table>
   <figure><img src="img/23-method.jpg" alt=""><figcaption>Рис. 22. Розділ «Як це працює» в самому застосунку: короткий опис методу, обмежень і джерел.</figcaption></figure>
 
 </section>
