@@ -113,9 +113,9 @@
 <section class="chapter">
   <h2>1. In brief</h2>
   <p>Before a rover, a drill or a crew goes to the Moon or Mars, NASA rehearses hardware and methods on Earth, at so-called <b>terrestrial analogs</b>: the Atacama Desert, Devon Island, Death Valley. Few such places are known, and most were chosen from expert experience. The hackathon challenge is to find and describe <b>new</b> analogs from open data.</p>
-  <p>We built a web app, Analog Atlas. The user picks a place on the Moon or Mars (for example, the Artemis base area near the lunar south pole) and what they want to rehearse there. The app compares every piece of Earth's land with that place (about 71 thousand cells of ~55 km) on 16 measured conditions. The result is a similarity map, the ten best places with an explanation of what is alike and what is not, a factor-by-factor comparison, close-up terrain from ESA Copernicus data, logistics, and a printable dossier for each candidate.</p>
+  <p>We built a web app, Analog Atlas. The user picks a place on the Moon or Mars (for example, the Artemis base area near the lunar south pole) and what they want to rehearse there. The app compares every piece of Earth's land with that place (about 71 thousand cells of ~55 km) on 20 measured conditions. The result is a similarity map, the ten best places with an explanation of what is alike and what is not, a factor-by-factor comparison, close-up terrain from ESA Copernicus data, logistics, and a printable dossier for each candidate.</p>
   <div class="keynums">
-    <div><b>71,070</b><span>cells of Earth's land, each described by 16 factors from open data</span></div>
+    <div><b>71,070</b><span>cells of Earth's land, each described by 20 factors from open data</span></div>
     <div><b>15</b><span>target sites: 6 on the Moon and 9 on Mars</span></div>
     <div><b>64–98%</b><span>median rank of known NASA/ESA test sites that the model never saw (a random place: 50%)</span></div>
     <div><b>93%</b><span>of places in the 90 top-10 lists stay in the best 1% of land when the weights change at random by ±50%</span></div>
@@ -236,7 +236,7 @@
 <section class="chapter">
   <h2>5. How it works: the method</h2>
   <h3>5.1. Data</h3>
-  <p>All the data are open. For Earth we took the global NASA POWER grid (0.5° × 0.625°, about 55 km) and kept only cells where at least a quarter of the area is land. That left 71,070 cells. Sixteen factors were measured for each:</p>
+  <p>All the data are open. For Earth we took the global NASA POWER grid (0.5° × 0.625°, about 55 km) and kept only cells where at least a quarter of the area is land. That left 71,070 cells. Twenty factors are measured for each. The table lists the first sixteen; section 11 adds the other four (dust, plutonic rock, sedimentary rock, salts):</p>
   <table>
     <tr><th style="width:24%">Factor</th><th style="width:38%">Earth (every cell)</th><th>Moon / Mars (every target)</th></tr>
     <tr><td>Relief, slope</td><td>NOAA ETOPO1, 3.7 km spacing</td><td>LRO LOLA (240 m near the pole), MGS MOLA 128 px/° (~460 m)</td></tr>

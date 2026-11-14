@@ -6,6 +6,12 @@ Built for the NASA Space Apps Challenge 2026: *Identify Earth Locations that Ana
 
 > Independent student project. Not an official NASA product and not endorsed by NASA.
 
+## Why
+
+Choosing a test site whose conditions are as close as possible to the conditions a vehicle or a habitat will meet takes a lot of data and a lot of effort. Not every unit and component needs a perfect match, so part of the testing can be done on Earth. Analog Atlas makes that choice easier: it compares a chosen place on the Moon or Mars with every piece of Earth’s land and shows where the conditions are closest. It uses 20 criteria, among them temperature and its swings, dust in the air, the type of surface and rock, relief, pressure, rain and ultraviolet light. It also says what Earth cannot give, which is low gravity, vacuum and cosmic radiation, so those tests still have to be done in space or in a laboratory.
+
+*Українською:* Підбір випробувального полігону з умовами, максимально наближеними до цільових умов експлуатації, вимагає аналізу великого обсягу даних і значних зусиль. Водночас частина агрегатів і вузлів не потребує стовідсоткового збігу умов, тож частину випробувань можна провести на Землі. «Атлас аналогів» спрощує цей вибір: він порівнює обране місце на Місяці чи Марсі з кожною ділянкою суходолу Землі та показує, де умови найближчі. Критеріїв усього 20, зокрема температура та її перепади, запиленість повітря, тип поверхні й порід, рельєф, тиск, опади й ультрафіолет. Також він показує, щого Земля відтворити не може: низької гравітації, вакууму й космічної радіації, тож такі випробування все одно треба проводити в космосі або в лабораторії.
+
 ## What it does
 
 The interface is in English and Ukrainian (switch in the header).
