@@ -666,9 +666,10 @@ function processHtml(i) {
 }
 
 // ---------- verdict: where the analogy holds, where it breaks down, what Earth cannot give, what to rehearse ----------
-// Fixed physical figures no Earth site can change. Dose: Moon — Chang'e-4 LND (Zhang et al. 2020, Sci. Adv. 6);
-// Mars — MSL RAD (Hassler et al. 2014, Science 343); Earth — world mean natural background, 2.4 mSv/yr (UNSCEAR 2008).
-const PHYS = { earth: { g: 9.81, dose: 2.4 / 365 }, moon: { g: 1.62, dose: 1.37 }, mars: { g: 3.71, dose: 0.67 } };
+// Fixed physical figures no Earth site can change. Dose: Moon — NASA Apollo crew dosimeters, mean absorbed dose per day over
+// whole flights, 0.22–1.27 mGy/day (English et al. 1973); Mars — MSL RAD surface, 0.210 mGy/day × quality factor 3.05 =
+// 0.64 mSv/day (Hassler et al. 2014, Science 343); Earth — world mean natural background, 2.4 mSv/yr (UNSCEAR 2008).
+const PHYS = { earth: { g: 9.81, dose: 2.4 / 365 }, moon: { g: 1.62, dose: [0.22, 1.27] }, mars: { g: 3.71, dose: 0.64 } };
 const purposeCache = new Map();
 function purposesOf(i) {
   const key = `${state.targetId}|${i}`;
@@ -685,7 +686,9 @@ function verdictHtml(i) {
   const phys = [
     [t('vdGravity'), `${num(E.g, 2)} ${t('vdMs2')}`, `${num(P.g, 2)} ${t('vdMs2')}`, t('vdTimesLess', { x: ratio(E.g, P.g) })],
     [t('vdPressure'), fmtValue('pressure', pE), pT > 0 ? fmtValue('pressure', pT) : t('vdVacuum'), pT > 0 && Number.isFinite(pE) ? t('vdTimesLess', { x: ratio(pE, pT) }) : ''],
-    [t('vdDose'), `${num(E.dose, 3)} ${t('vdMsv')}`, `${num(P.dose, 2)} ${t('vdMsv')}`, t('vdTimesMore', { x: ratio(P.dose, E.dose) })],
+    Array.isArray(P.dose)
+      ? [t('vdDose'), `${num(E.dose, 3)} ${t('vdMsv')}`, `${num(P.dose[0], 2)}–${num(P.dose[1], 2)} ${t('vdMgy')}`, t('vdTimesMore', { x: `≈${Number((P.dose[0] / E.dose).toPrecision(2))}–${Number((P.dose[1] / E.dose).toPrecision(2))}` })]
+      : [t('vdDose'), `${num(E.dose, 3)} ${t('vdMsv')}`, `${num(P.dose, 2)} ${t('vdMsv')}`, t('vdTimesMore', { x: ratio(P.dose, E.dose) })],
   ];
   const all = purposesOf(i);
   const uses = purposesFor(state.body).filter((p) => p !== 'balanced').map((p) => ({ p, rank: 1 - all[p].top }))
