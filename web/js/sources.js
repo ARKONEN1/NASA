@@ -44,7 +44,7 @@ export const GROUPS = [
       wen: 'Earth relief, ~3.7 km step', wuk: 'рельєф Землі, крок ~3,7 км' },
     { url: 'https://volcano.si.edu/', en: 'Smithsonian Global Volcanism Program', uk: 'Smithsonian Global Volcanism Program',
       wen: 'Holocene volcanoes with rock type', wuk: 'голоценові вулкани з типом породи' },
-    { url: 'http://www.passc.net/EarthImpactDatabase/', en: 'Earth Impact Database (PASSC, University of New Brunswick)', uk: 'Earth Impact Database (PASSC, Університет Нью-Брансвіка)',
+    { url: 'https://www.unb.ca/fredericton/science/research/passc/', en: 'Earth Impact Database (PASSC, University of New Brunswick)', uk: 'Earth Impact Database (PASSC, Університет Нью-Брансвіка)',
       wen: 'confirmed exposed impact structures', wuk: 'підтверджені відкриті ударні структури' },
     { url: 'https://doi.org/10.1594/PANGAEA.788537', en: 'GLiM v1.0 Global Lithological Map (Hartmann & Moosdorf 2012, PANGAEA, CC BY 3.0)', uk: 'GLiM v1.0, глобальна літологічна карта (Hartmann & Moosdorf 2012, PANGAEA, CC BY 3.0)',
       wen: 'plutonic, sedimentary rock and evaporites', wuk: 'плутонічні, осадові породи й евапорити',
